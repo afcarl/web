@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Aaron O'Leary - code</title>
+    <meta name="description" content="a poole site" />
+    <meta name="keywords" content="poole" />
+    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/markdown.css" />
+    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/pygment.css" />
+</head>
+<body>
+    <div id="box">
+    <div id="header">
+         <h1>code</h1>
+    </div>
+    <div id="menu">
+    <span class=""><a href="/home/eeaol/web/output/index.html">home</a></span>
+<span class="current"><a href="/home/eeaol/web/output/code.html">code</a></span>
+<span class=""><a href="/home/eeaol/web/output/blog.html">blog</a></span>
+<span class=""><a href="/home/eeaol/web/output/meta.html">meta</a></span>
+    </div>
+    <div id="content"><p>A test to see how code does. Here's some python</p>
+<div class="codehilite"><pre><span class="c"># V2 of get_data. this is a refactoring of v1.</span>
+<span class="c"># want to separate out thresholding and more advanced processing.</span>
+<span class="c"># the thresholding is the slowest part presently and it is quite </span>
+<span class="c"># stable and well behaved now --&gt; makes sense to only do it once</span>
+<span class="c"># and store the data in some intermediate file.</span>
+<span class="c"># Have implemented this. intermediate files are &#39;basic/basic_%s&#39; % run</span>
+<span class="c"># basic refers to the data that threshold extracts from the image.</span>
+
+<span class="c"># thresholding: goes through an image column by column applying a logical test</span>
+<span class="c"># to each pixel value in the column to determine whether the pixel represents</span>
+<span class="c"># green fluid or not. then, from the top down, the first pixel that passes</span>
+<span class="c"># this test has it&#39;s y coordinate output to a list.</span>
+<span class="c"># </span>
+<span class="c"># so thresholding returns a list that has the length of the pixel array width.</span>
+<span class="c"># </span>
+<span class="c"># peakdetect is a module that includes a method to make a list of the</span>
+<span class="c"># coordinates of maxima and minima in some signal.</span>
+<span class="c">#</span>
+<span class="c"># the measured interface and inferred peaks are then overlaid onto the target</span>
+<span class="c"># image for inspection.</span>
+<span class="c">#</span>
+<span class="c"># TODO 1) Wavelength measurement</span>
+<span class="c"># this is actually a bit involved. to calculate fwhm, need to know deviation</span>
+<span class="c"># from baseline and whilst this can be calculated for an initial baseline, it</span>
+<span class="c"># doesn&#39;t deal with the case of an undular bore, in which the baseline is</span>
+<span class="c"># shifted vertically.</span>
+<span class="c"># however, a baseline is needed anyway</span>
+<span class="c">#      2) baseline detection</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">threshold</span>
+<span class="kn">import</span> <span class="nn">peakdetect</span>
+<span class="kn">import</span> <span class="nn">sanity</span>
+
+<span class="c">#####CONFIG#####</span>
+
+<span class="c"># perhaps this is a good place to use a class instead of all of these dicts?</span>
+<span class="c"># How about a Camera class, with attributes of rulers, offsets, scales, etc.</span>
+
+<span class="c"># specify a vertical region of the image in which to search for the interface</span>
+<span class="n">region</span> <span class="o">=</span> <span class="p">(</span><span class="mi">130</span><span class="p">,</span> <span class="mi">590</span><span class="p">)</span>
+
+<span class="c"># specify the threshold values to use. fiddling with these has a strong impact</span>
+<span class="c"># on the quality of the interface signal.</span>
+<span class="n">thresh_green</span> <span class="o">=</span> <span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">thresh_red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="n">thresh_values</span> <span class="o">=</span> <span class="p">(</span><span class="n">thresh_green</span><span class="p">,</span> <span class="n">thresh_red</span><span class="p">)</span>
+
+<span class="c"># specify the positions of rulers and other vertical features that</span>
+<span class="c"># obscure the fluid.</span>
+<span class="n">rulers</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">rulers</span><span class="p">[</span><span class="s">&#39;cam1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">105</span><span class="p">),</span> <span class="p">(</span><span class="mi">870</span><span class="p">,</span> <span class="mi">950</span><span class="p">),</span> <span class="p">(</span><span class="mi">1740</span><span class="p">,</span> <span class="mi">1810</span><span class="p">)]</span>
+<span class="n">rulers</span><span class="p">[</span><span class="s">&#39;cam2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">130</span><span class="p">),</span> <span class="p">(</span><span class="mi">950</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span> <span class="p">(</span><span class="mi">1820</span><span class="p">,</span> <span class="mi">1870</span><span class="p">),</span> \
+                <span class="p">(</span><span class="mi">2665</span><span class="p">,</span> <span class="mi">2695</span><span class="p">),</span> <span class="p">(</span><span class="mi">2705</span><span class="p">,</span> <span class="mi">2725</span><span class="p">)]</span>
+
+<span class="c"># specify the offsets that each of the cameras have, for normalisation of</span>
+<span class="c"># pixel measurements</span>
+<span class="n">camera_offsets</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">camera_offsets</span><span class="p">[</span><span class="s">&#39;cam1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2650</span><span class="p">,</span> <span class="mi">543</span><span class="p">)</span>
+<span class="c">## TODO the 2750 value here is the same as a value in threshold module</span>
+<span class="c">## they need to be the same.</span>
+<span class="c">## the 2600 value is the distance from the identical place in cam1 to </span>
+<span class="c">## the lock in cam1</span>
+<span class="n">camera_offsets</span><span class="p">[</span><span class="s">&#39;cam2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2750</span><span class="o">+</span><span class="mi">2600</span><span class="p">,</span> <span class="mi">543</span><span class="p">)</span>
+
+<span class="c"># specify the scale, i.e how many pixels to some real measurement in the</span>
+<span class="c"># images. in y we want this to be the total fluid depth. in x make it the</span>
+<span class="c"># lock length for now (25cm).</span>
+<span class="n">fluid_depth</span> <span class="o">=</span> <span class="mi">543</span><span class="o">-</span><span class="mi">109</span>
+<span class="n">lock_length</span> <span class="o">=</span> <span class="mi">440</span>
+<span class="n">scales</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">scales</span><span class="p">[</span><span class="s">&#39;cam1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lock_length</span><span class="p">,</span> <span class="n">fluid_depth</span><span class="p">)</span>
+<span class="n">scales</span><span class="p">[</span><span class="s">&#39;cam2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">lock_length</span><span class="p">,</span> <span class="n">fluid_depth</span><span class="p">)</span>
+
+<span class="c"># where is the data going to be stored?? (filename)</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="s">&#39;/home/eeaol/code/lab-waves/data/&#39;</span>
+<span class="n">data_storage_file</span> <span class="o">=</span> <span class="n">data_dir</span> <span class="o">+</span> <span class="s">&#39;data/data_store_&#39;</span>
+
+<span class="c"># specify where the centre of the camera was pointing to.</span>
+<span class="c"># used in parallax_corr</span>
+<span class="n">centre</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">centre</span><span class="p">[</span><span class="s">&#39;cam1&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.75</span>
+<span class="n">centre</span><span class="p">[</span><span class="s">&#39;cam2&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.25</span>
+
+<span class="c">#####/CONFIG#####</span>
+
+<span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;uses pickle to write a dict to disk for persistent storage&quot;&quot;&quot;</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="c"># b is binary</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reads in a dict from filename and returns it&quot;&quot;&quot;</span>
+    <span class="nb">input</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+    <span class="n">data_dict</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+    <span class="nb">input</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data_dict</span>
+
+<span class="k">def</span> <span class="nf">parallax_corr</span><span class="p">(</span><span class="n">xin</span><span class="p">,</span> <span class="n">cam</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Lab images suffer from parallax due to the static cameras.</span>
+<span class="sd">    This is easily corrected for by assuming that features are 2d</span>
+<span class="sd">    and homogeneous in the y coord (widthways across the tank.&quot;&quot;&quot;</span>
+    <span class="c"># lock_displacement is chosen to make the reference x a distance</span>
+    <span class="c"># of l/2 from the midpoint.</span>
+    <span class="c"># unscaled = [s * x for s,x in zip(scales[cam], xy_tuple)] </span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="c"># lock-lengths</span>
+    <span class="n">unscaled_x</span> <span class="o">=</span> <span class="n">xin</span> <span class="o">*</span> <span class="n">scale</span>
+    <span class="n">x_wrt_to_lock</span> <span class="o">=</span> <span class="n">unscaled_x</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x_wrt_to_lock</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">centre</span><span class="p">[</span><span class="n">cam</span><span class="p">]</span> 
+    <span class="n">d</span> <span class="o">=</span> <span class="mf">1.45</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="mf">0.20</span>
+    <span class="c"># given pos in tank x, fov width l, distance from cam to tank d</span>
+    <span class="c"># and width of tank w, the correction is</span>
+    <span class="n">corr</span> <span class="o">=</span> <span class="n">p</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">l</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">/</span> <span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="n">d</span><span class="p">))</span>
+    <span class="n">x_corr</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">corr</span>
+    <span class="c"># corr_unscaled = (x_corr, unscaled[1])</span>
+    <span class="c"># corr_xy_tuple = tuple([x / s for x,s in zip(corr_unscaled, scales[cam])])</span>
+    <span class="n">scale_x_corr</span> <span class="o">=</span> <span class="n">x_corr</span> <span class="o">/</span> <span class="n">scale</span>
+    <span class="k">return</span> <span class="n">scale_x_corr</span>
+
+<span class="k">def</span> <span class="nf">norm</span><span class="p">(</span><span class="n">inlist</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; takes a list of tuples and normalises them according to</span>
+<span class="sd">    pre-defined camera offsets and scalings. p=0 (default), means</span>
+<span class="sd">    no parallax correction. p!=0 switches it on (for the x-value),</span>
+<span class="sd">    scaling the parallax correction factor by p.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">norm_tuple</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+        <span class="n">offsets</span> <span class="o">=</span> <span class="n">camera_offsets</span><span class="p">[</span><span class="n">camera</span><span class="p">]</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">scales</span><span class="p">[</span><span class="n">camera</span><span class="p">]</span>
+        <span class="n">input_norm</span> <span class="o">=</span> <span class="p">[(</span><span class="n">o</span> <span class="o">-</span> <span class="n">i</span><span class="p">)</span><span class="o">/</span><span class="n">s</span> <span class="k">for</span> <span class="n">o</span><span class="p">,</span><span class="n">i</span><span class="p">,</span><span class="n">s</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">offsets</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">scale</span><span class="p">)]</span>
+        <span class="c"># apply the parallax correction to the tuple x</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">input_norm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">parallax_corr</span><span class="p">(</span><span class="n">input_norm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">camera</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="n">input_norm</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">input_norm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">input_norm</span>
+    <span class="n">inlist_norm</span> <span class="o">=</span> <span class="p">[</span><span class="n">norm_tuple</span><span class="p">(</span><span class="n">tupe</span><span class="p">)</span> <span class="k">for</span> <span class="n">tupe</span> <span class="ow">in</span> <span class="n">inlist</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">inlist_norm</span>
+
+<span class="k">def</span> <span class="nf">iframe</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">frame</span>
+
+<span class="k">def</span> <span class="nf">get_basic_frame_data</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="c"># get the list of interface depths</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;thresholding image </span><span class="si">%s</span><span class="s">...&quot;</span> <span class="o">%</span> <span class="n">image</span><span class="p">)</span>
+    <span class="n">interface</span><span class="p">,</span> <span class="n">current</span><span class="p">,</span> <span class="n">front_coord</span>\
+            <span class="o">=</span> <span class="n">threshold</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">rulers</span><span class="p">,</span> <span class="n">thresh_values</span><span class="p">)</span>
+
+    <span class="n">basic_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">basic_data</span><span class="p">[</span><span class="s">&#39;interface&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interface</span>
+    <span class="n">basic_data</span><span class="p">[</span><span class="s">&#39;current&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current</span>
+    <span class="n">basic_data</span><span class="p">[</span><span class="s">&#39;front_coord&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">front_coord</span>
+
+    <span class="k">return</span> <span class="n">basic_data</span>
+
+<span class="k">def</span> <span class="nf">get_basic_run_data</span><span class="p">(</span><span class="n">run</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;grabs all basic data from a run&quot;&quot;&quot;</span>
+    <span class="c"># run = &#39;11_7_06c&#39;</span>
+    <span class="n">run</span> <span class="o">=</span> <span class="n">run</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;r&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">basic_run_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">camera</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;cam1&#39;</span><span class="p">,</span> <span class="s">&#39;cam2&#39;</span><span class="p">):</span>
+        <span class="n">basic_run_data</span><span class="p">[</span><span class="n">camera</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">cam_data</span> <span class="o">=</span> <span class="n">basic_run_data</span><span class="p">[</span><span class="n">camera</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="n">run</span><span class="o">+</span><span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">camera</span> <span class="o">+</span> <span class="s">&#39;/*jpg&#39;</span><span class="p">)):</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">iframe</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">cam_data</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_basic_frame_data</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">basic_run_data</span>
+
+<span class="k">def</span> <span class="nf">get_basic_data</span><span class="p">(</span><span class="n">runs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">runs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;11_7_06c&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="n">runs</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
+        <span class="n">basic_run_data</span> <span class="o">=</span> <span class="n">get_basic_run_data</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">data_dir</span> <span class="o">+</span> <span class="s">&#39;basic/basic_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">run</span>
+        <span class="n">write_data</span><span class="p">(</span><span class="n">basic_run_data</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_frame_data</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">run_data_container</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;gets the data for a single image.</span>
+<span class="sd">    runs the external threshold module to produce the data,</span>
+<span class="sd">    then normalises it and puts it in a dictionary for storage&quot;&quot;&quot;</span>
+
+    <span class="n">sp</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">iframe</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="n">camera</span> <span class="o">=</span> <span class="n">sp</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">basic_data</span> <span class="o">=</span> <span class="n">run_data_container</span><span class="p">[</span><span class="n">camera</span><span class="p">][</span><span class="n">frame</span><span class="p">]</span> 
+    <span class="n">interface</span> <span class="o">=</span> <span class="n">basic_data</span><span class="p">[</span><span class="s">&#39;interface&#39;</span><span class="p">]</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="n">basic_data</span><span class="p">[</span><span class="s">&#39;current&#39;</span><span class="p">]</span>
+    <span class="n">front_coord</span> <span class="o">=</span> <span class="n">basic_data</span><span class="p">[</span><span class="s">&#39;front_coord&#39;</span><span class="p">]</span>
+
+    <span class="c"># get the lists of the positions of maxima and minima.</span>
+    <span class="c"># at this point they are maxima in DEPTH! so MINIMA in height.</span>
+    <span class="c"># print(&quot;detecting the peaks&quot;)</span>
+    <span class="n">_min</span><span class="p">,</span> <span class="n">_max</span> <span class="o">=</span> <span class="n">peakdetect</span><span class="o">.</span><span class="n">peakdetect</span><span class="p">(</span><span class="n">interface</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="c"># check that the front and wave peaks make sense by overlaying</span>
+    <span class="c"># measured positions onto the source image and writing this out</span>
+    <span class="c"># to the sanity directories</span>
+    <span class="n">sanity</span><span class="o">.</span><span class="n">sanity_check</span><span class="p">(</span><span class="n">interface</span><span class="p">,</span> <span class="n">_max</span><span class="p">,</span> <span class="n">_min</span><span class="p">,</span> <span class="n">front_coord</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
+    <span class="c"># make a container for the data and populate it</span>
+    <span class="n">frame_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># need the baseline when doing amplitude deviations</span>
+    <span class="c">#FIXME frame identity incorrect</span>
+    <span class="k">if</span> <span class="n">frame</span> <span class="o">==</span> <span class="s">&#39;img_0001.jpg&#39;</span><span class="p">:</span>
+        <span class="c"># calculate the baseline, putting it in the same list/tuple</span>
+        <span class="c"># format as the other data</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span><span class="nb">sum</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">interface</span><span class="p">))]</span>
+        <span class="n">frame_data</span><span class="p">[</span><span class="s">&#39;baseline&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">baseline</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span>
+
+    <span class="c"># put the interface into the standard format</span>
+    <span class="n">interface</span> <span class="o">=</span> <span class="p">[(</span><span class="n">i</span><span class="p">,</span><span class="n">interface</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interface</span><span class="p">))]</span>
+
+    <span class="n">frame_data</span><span class="p">[</span><span class="s">&#39;interface&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">interface</span><span class="p">,</span> <span class="n">camera</span><span class="p">)</span>    
+    <span class="n">frame_data</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">_max</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">frame_data</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">_min</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">frame_data</span><span class="p">[</span><span class="s">&#39;front&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">front_coord</span><span class="p">,</span> <span class="n">camera</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">frame_data</span>
+
+<span class="k">def</span> <span class="nf">get_run_data</span><span class="p">(</span><span class="n">run</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;grabs all data from a run&quot;&quot;&quot;</span>
+    <span class="c"># run = &#39;11_7_06c&#39;</span>
+    <span class="n">basic_run_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="s">&#39;basic/basic_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">run</span><span class="p">)</span>
+    <span class="n">run_data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">camera</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;cam1&#39;</span><span class="p">,</span> <span class="s">&#39;cam2&#39;</span><span class="p">):</span>
+        <span class="n">run_data</span><span class="p">[</span><span class="n">camera</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">cam_data</span> <span class="o">=</span> <span class="n">run_data</span><span class="p">[</span><span class="n">camera</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">data_dir</span> <span class="o">+</span> <span class="n">run</span><span class="o">+</span><span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">camera</span> <span class="o">+</span> <span class="s">&#39;/*jpg&#39;</span><span class="p">)):</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">iframe</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+            <span class="n">cam_data</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_frame_data</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">basic_run_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">run_data</span>
+
+<span class="c">## MAIN function</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">runs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c"># make container for all the data</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c"># define the runs to collect data from</span>
+    <span class="k">if</span> <span class="n">runs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;11_7_06c&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">runs</span> <span class="o">=</span> <span class="p">[</span><span class="n">runs</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">:</span>
+        <span class="n">run_data</span> <span class="o">=</span> <span class="n">get_run_data</span><span class="p">(</span><span class="n">run</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;r&#39;</span><span class="o">+</span><span class="n">run</span><span class="p">]</span> <span class="o">=</span> <span class="n">run_data</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">data_storage_file</span> <span class="o">+</span> <span class="s">&#39;r&#39;</span> <span class="o">+</span> <span class="n">run</span>
+        <span class="k">print</span> <span class="s">&quot;writing the data to&quot;</span><span class="p">,</span> <span class="nb">file</span>
+        <span class="n">write_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">obj_dic</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;a useful method for turning a dict into an object, so that</span>
+<span class="sd">    d[&#39;blah&#39;][&#39;bleh&#39;] is the same as d.blah.bleh.</span>
+<span class="sd">    will work with any level of nesting inside the dict.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s">&#39;new&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">object</span><span class="p">,),</span> <span class="n">d</span><span class="p">)</span>
+    <span class="n">seqs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">obj_dic</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">seqs</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">j</span><span class="p">)(</span><span class="n">obj_dic</span><span class="p">(</span><span class="n">sj</span><span class="p">)</span>\
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">sj</span> <span class="k">for</span> <span class="n">sj</span> <span class="ow">in</span> <span class="n">j</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">top</span>
+
+<span class="k">def</span> <span class="nf">get_offset_from_front</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Looks at the front trajectory and determines the offset</span>
+<span class="sd">    between the cameras by minimising the step in value between</span>
+<span class="sd">    the two cameras.&quot;&quot;&quot;</span>
+    <span class="n">f1xt</span> <span class="o">=</span> <span class="p">[[</span><span class="n">data</span><span class="p">[</span><span class="n">run</span><span class="p">][</span><span class="s">&#39;cam1&#39;</span><span class="p">][</span><span class="n">fr</span><span class="p">][</span><span class="s">&#39;front&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">fr</span><span class="p">]</span>\
+            <span class="k">for</span> <span class="n">fr</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">run</span><span class="p">][</span><span class="s">&#39;cam1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+    <span class="n">f2xt</span> <span class="o">=</span> <span class="p">[[</span><span class="n">data</span><span class="p">[</span><span class="n">run</span><span class="p">][</span><span class="s">&#39;cam2&#39;</span><span class="p">][</span><span class="n">fr</span><span class="p">][</span><span class="s">&#39;front&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">fr</span><span class="p">]</span>\
+            <span class="k">for</span> <span class="n">fr</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">run</span><span class="p">][</span><span class="s">&#39;cam2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+
+    <span class="n">f1x</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">f1xt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">f1t</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">f1xt</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">f2x</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">f2xt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">f2t</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">f2xt</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+</pre></div></div>
+    </div>
+    <div id="footer"; style="font-size: 6pt">
+        Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a>
+        &middot;
+        Licensed as <a href="http://creativecommons.org/licenses/by-sa/3.0">CC-SA</a>
+    </div>
+</body>
+</html>

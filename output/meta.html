@@ -5,7 +5,8 @@
     <title>Aaron O'Leary - meta</title>
     <meta name="description" content="a poole site" />
     <meta name="keywords" content="poole" />
-    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/poole.css" />
+    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/markdown.css" />
+    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/pygment.css" />
 </head>
 <body>
     <div id="box">
@@ -14,6 +15,7 @@
     </div>
     <div id="menu">
     <span class=""><a href="/home/eeaol/web/output/index.html">home</a></span>
+<span class=""><a href="/home/eeaol/web/output/code.html">code</a></span>
 <span class=""><a href="/home/eeaol/web/output/blog.html">blog</a></span>
 <span class="current"><a href="/home/eeaol/web/output/meta.html">meta</a></span>
     </div>
@@ -30,12 +32,11 @@ time fiddling with ruby.</p>
 site do anything useful. Whilst reinventing the wheel is good for learning,
 it isn't especially efficient. </p>
 <p>A bit more searching and I came across <a href="https://bitbucket.org/obensonne/poole/overview">Poole</a>, which says</p>
-<div class="codehilite"><pre><span class="n">Poole</span> <span class="n">may</span> <span class="n">be</span> <span class="n">a</span> <span class="n">good</span> <span class="n">choice</span> <span class="k">if</span> <span class="n">you</span> <span class="n">are</span> <span class="n">familiar</span> <span class="n">with</span> <span class="n">Markdown</span> <span class="ow">and</span> <span class="n">Python</span>
-<span class="ow">and</span> <span class="k">if</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">build</span> <span class="n">a</span> <span class="n">rather</span> <span class="n">simple</span> <span class="n">site</span> <span class="n">with</span> <span class="n">only</span> <span class="n">a</span> <span class="n">spot</span> <span class="n">of</span>
-<span class="n">generated</span> <span class="n">content</span><span class="o">.</span>
-</pre></div>
-
-
+<blockquote>
+<p>Poole may be a good choice if you are familiar with Markdown and Python
+  and if you want to build a rather simple site with only a spot of
+  generated content.</p>
+</blockquote>
 <p>Great. I know Markdown and Python and I want a simple site!</p>
 <p>If we want to put posts into the notes section of the site and want
 them to appear in the page we need to do a couple of things.</p>
@@ -97,9 +98,20 @@ rm -f tmpf
 <h2>Syntax Highlighting</h2>
 <p>This isn't enabled by default in Poole, but it is easy to get set up.</p>
 <p><a href="http://freewisdom.org/projects/python-markdown/CodeHilite">CodeHilite</a> is an included extension to python-markdown. The only
-requirement is Pygments.</p>
-<p>TRUTH!!???
-Just run poole with <code>--md-ext='codehilite'</code> and the rest is auto-magical.</p></div>
+requirement is <a href="http://pygments.org/">Pygments</a>.</p>
+<p>To get syntax highlighting you need a css for pygment to work with.
+Add this to your template page (page.html)</p>
+<div class="codehilite"><pre><span class="o">&lt;</span><span class="nb">link</span> <span class="n">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="n">type</span><span class="o">=</span><span class="s">&quot;text/css&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s">&quot;style/pygment.css&quot;</span> <span class="o">/&gt;</span>
+</pre></div>
+
+
+<p>and make sure that style contains pygment.css, where this is a file
+like one of <a href="https://github.com/icco/pygments-css">these</a></p>
+<p>with all of the <code>.highlight</code> at the start of the lines replaced with
+<code>.codehilite</code> (as this is the css class that markdown wraps code in),
+e.g</p>
+<div class="codehilite"><pre><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">&#39;s/^\.highlight/.codehilite/g&#39;</span> <span class="n">name_of_pygment_css_file</span><span class="o">.</span><span class="n">css</span>
+</pre></div></div>
     </div>
     <div id="footer"; style="font-size: 6pt">
         Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a>

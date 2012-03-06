@@ -23,9 +23,9 @@ it isn't especially efficient.
 
 A bit more searching and I came across [Poole], which says
 
-    Poole may be a good choice if you are familiar with Markdown and Python
-    and if you want to build a rather simple site with only a spot of
-    generated content.
+>   Poole may be a good choice if you are familiar with Markdown and Python
+>   and if you want to build a rather simple site with only a spot of
+>   generated content.
 
 [Poole]: https://bitbucket.org/obensonne/poole/overview
 
@@ -77,9 +77,24 @@ Syntax Highlighting
 This isn't enabled by default in Poole, but it is easy to get set up.
 
 [CodeHilite][] is an included extension to python-markdown. The only
-requirement is Pygments.
-
-TRUTH!!???
-Just run poole with `--md-ext='codehilite'` and the rest is auto-magical.
+requirement is [Pygments][].
 
 [CodeHilite]: http://freewisdom.org/projects/python-markdown/CodeHilite
+[Pygments]: http://pygments.org/
+
+To get syntax highlighting you need a css for pygment to work with.
+Add this to your template page (page.html)
+
+    <link rel="stylesheet" type="text/css" href="style/pygment.css" />
+    
+and make sure that style contains pygment.css, where this is a file
+like one of [these][css-ex]
+
+[css-ex]: https://github.com/icco/pygments-css
+
+with all of the `.highlight` at the start of the lines replaced with
+`.codehilite` (as this is the css class that markdown wraps code in),
+e.g
+
+    sed -i 's/^\.highlight/.codehilite/g' name_of_pygment_css_file.css
+
