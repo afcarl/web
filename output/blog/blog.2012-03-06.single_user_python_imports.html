@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Aaron O'Leary - blog</title>
+    <meta name="description" content="a poole site" />
+    <meta name="keywords" content="poole" />
+    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/poole.css" />
+</head>
+<body>
+    <div id="box">
+    <div id="header">
+         <h1>blog</h1>
+    </div>
+    <div id="menu">
+    <span class=""><a href="/home/eeaol/web/output/index.html">home</a></span>
+<span class="current"><a href="/home/eeaol/web/output/blog.html">blog</a></span>
+<span class=""><a href="/home/eeaol/web/output/meta.html">meta</a></span>
+    </div>
+    <div id="content"><p>This came about because I wanted the <a href="http://freewisdom.org/projects/python-markdown/">python-markdown</a> for
+generating the content on this site using <a href="https://bitbucket.org/obensonne/poole">Poole</a> or <a href="https://github.com/dz/chisel">Chisel</a>.</p>
+<p>On my university machine I don't have any admin rights, which is
+almost certainly for the best. However, this means that I can't
+install my own python modules in a standard way.</p>
+<p>It is quite easy to install modules to my user account. For
+modules with their own setup.py, just do</p>
+<div class="codehilite"><pre><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span>
+</pre></div>
+
+
+<p>This is described in the <a href="http://docs.python.org/install/index.html#alternate-installation-the-user-scheme">python documentation</a> and it
+installs to ~/.local.  Alternatively we can install to the 
+<a href="http://docs.python.org/install/index.html#alternate-installation-the-home-scheme">home directory</a>,</p>
+<div class="codehilite"><pre><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">home</span><span class="o">=~</span>
+</pre></div>
+
+
+<p>The user scheme is preferred as it is then immediately available
+to import within python. If the home scheme is used, the PYTHONPATH
+environmental variable needs to be set,</p>
+<p>bash:</p>
+<div class="codehilite"><pre><span class="n">export</span> <span class="n">PYTHONPATH</span><span class="o">=</span><span class="nv">$HOME</span><span class="sr">/lib/</span><span class="n">python:</span><span class="nv">$PYTHONPATH</span>
+</pre></div>
+
+
+<p>csh:</p>
+<div class="codehilite"><pre><span class="n">setenv</span> <span class="n">PYTHONPATH</span> <span class="nv">$HOME</span><span class="sr">/lib/</span><span class="n">python:</span><span class="nv">$PYTHONPATH</span>
+</pre></div>
+
+
+<p>If the module uses easy_install,</p>
+<div class="codehilite"><pre><span class="n">easy_install</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="nv">$HOME</span><span class="sr">/.local/</span> <span class="n">someeasyinstallablemodule</span>
+</pre></div>
+
+
+<p>TODO: Or with pip,</p>
+<h2>Summary</h2>
+<p>Install the markdown python module without admin (root) rights like
+this:</p>
+<div class="codehilite"><pre><span class="n">cd</span> <span class="o">~/</span><span class="n">make</span>
+<span class="n">wget</span> <span class="n">http:</span><span class="sr">//</span><span class="n">pypi</span><span class="o">.</span><span class="n">python</span><span class="o">.</span><span class="n">org</span><span class="sr">/packages/so</span><span class="n">urce</span><span class="sr">/M/</span><span class="n">Markdown</span><span class="o">/</span><span class="n">Markdown</span><span class="o">-</span><span class="mf">2.1.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span><span class="c1">#</span>
+<span class="n">tar</span> <span class="n">xvzf</span> <span class="n">Markdown</span><span class="o">-</span><span class="mf">2.1.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">cd</span> <span class="n">Markdown</span><span class="o">-</span><span class="mf">2.1.1</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">user</span>
+</pre></div></div>
+    </div>
+    <div id="footer"; style="font-size: 6pt">
+        Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a>
+        &middot;
+        Licensed as <a href="http://creativecommons.org/licenses/by-sa/3.0">CC-SA</a>
+    </div>
+</body>
+</html>

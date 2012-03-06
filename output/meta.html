@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Aaron O'Leary - meta</title>
+    <meta name="description" content="a poole site" />
+    <meta name="keywords" content="poole" />
+    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/poole.css" />
+</head>
+<body>
+    <div id="box">
+    <div id="header">
+         <h1>meta</h1>
+    </div>
+    <div id="menu">
+    <span class=""><a href="/home/eeaol/web/output/index.html">home</a></span>
+<span class=""><a href="/home/eeaol/web/output/blog.html">blog</a></span>
+<span class="current"><a href="/home/eeaol/web/output/meta.html">meta</a></span>
+    </div>
+    <div id="content"><p>06/03/2012</p>
+<p>I really didn't want to write any html for this site. Html is horrible.
+I know and use <a href="http://daringfireball.net/projects/markdown/">Markdown</a> and just needed something to manage my Markdown
+content.</p>
+<p>Trying to understand <a href="http://ringce.com/hyde">Hyde</a> made my head hurt. It was too complicated
+for what I need. There are lots of static site generators written in Ruby.
+That's no good for me - I understand Python and don't want to spend
+time fiddling with ruby.</p>
+<p>I tried to write my own CMS in bash but the complexity quickly builds up 
+(beyond the 50 lines of code I limited myself to) when you try and make your
+site do anything useful. Whilst reinventing the wheel is good for learning,
+it isn't especially efficient. </p>
+<p>A bit more searching and I came across <a href="https://bitbucket.org/obensonne/poole/overview">Poole</a>, which says</p>
+<div class="codehilite"><pre><span class="n">Poole</span> <span class="n">may</span> <span class="n">be</span> <span class="n">a</span> <span class="n">good</span> <span class="n">choice</span> <span class="k">if</span> <span class="n">you</span> <span class="n">are</span> <span class="n">familiar</span> <span class="n">with</span> <span class="n">Markdown</span> <span class="ow">and</span> <span class="n">Python</span>
+<span class="ow">and</span> <span class="k">if</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">build</span> <span class="n">a</span> <span class="n">rather</span> <span class="n">simple</span> <span class="n">site</span> <span class="n">with</span> <span class="n">only</span> <span class="n">a</span> <span class="n">spot</span> <span class="n">of</span>
+<span class="n">generated</span> <span class="n">content</span><span class="o">.</span>
+</pre></div>
+
+
+<p>Great. I know Markdown and Python and I want a simple site!</p>
+<p>If we want to put posts into the notes section of the site and want
+them to appear in the page we need to do a couple of things.</p>
+<ul>
+<li>filename needs to be in the format <code>blog.yyyy-mm-dd.post_title.md</code></li>
+<li>The file needs to have <code>---</code> at the start.</li>
+</ul>
+<p>I don't know why the second is the case, but that's what works.</p>
+<p>This is something that is easily scripted. The idea is that I'll have
+some notes written in Markdown somewhere on my machine and then do
+<code>webify filename</code> and have it appear in the blog section of the website.</p>
+<p><code>Webify</code> looks something like this (in bash):</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre></div></td><td class="code"><div class="codehilite"><pre><span class="nv">filepath</span><span class="o">=</span><span class="nv">$1</span>
+<span class="c"># file may or may not have .extension</span>
+<span class="nv">filename</span><span class="o">=</span><span class="k">$(</span>basename <span class="k">${</span><span class="nv">filepath</span><span class="k">})</span>
+<span class="nv">short_filename</span><span class="o">=</span><span class="k">${</span><span class="nv">filename</span><span class="p">%.*</span><span class="k">}</span>
+
+<span class="c"># where is the webpage input dir?</span>
+<span class="nv">input_dir</span><span class="o">=</span>/home/eeaol/web/input/blog
+
+<span class="c"># get the date from the file, assuming dd/mm/yyyy format and</span>
+<span class="c"># converting to yyyy-mm-dd</span>
+<span class="nv">date</span><span class="o">=</span><span class="k">$(</span>grep <span class="s1">&#39;[0-9]./[0-9]./[0-9]...&#39;</span> <span class="nv">$filename</span> |<span class="se">\</span>
+        sed -e <span class="s1">&#39;s/^[^0-9]*//&#39;</span> <span class="se">\</span>
+            -e <span class="s1">&#39;s/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/&#39;</span><span class="k">)</span>
+
+<span class="nv">newfilepath</span><span class="o">=</span><span class="k">${</span><span class="nv">input_dir</span><span class="k">}</span>/blog.<span class="k">${</span><span class="nv">date</span><span class="k">}</span>.<span class="k">${</span><span class="nv">short_filename</span><span class="k">}</span>.md
+cp <span class="nv">$filepath</span> <span class="nv">$newfilepath</span>
+
+<span class="c"># add the --- to the start of the file</span>
+<span class="nb">echo</span> <span class="s2">&quot;---&quot;</span> &gt;&gt; tmpf
+cat <span class="nv">$newfilepath</span> &gt;&gt; tmpf
+mv tmpf <span class="nv">$newfilepath</span>
+rm -f tmpf
+</pre></div>
+</td></tr></table>
+
+<h2>Syntax Highlighting</h2>
+<p>This isn't enabled by default in Poole, but it is easy to get set up.</p>
+<p><a href="http://freewisdom.org/projects/python-markdown/CodeHilite">CodeHilite</a> is an included extension to python-markdown. The only
+requirement is Pygments.</p>
+<p>TRUTH!!???
+Just run poole with <code>--md-ext='codehilite'</code> and the rest is auto-magical.</p></div>
+    </div>
+    <div id="footer"; style="font-size: 6pt">
+        Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a>
+        &middot;
+        Licensed as <a href="http://creativecommons.org/licenses/by-sa/3.0">CC-SA</a>
+    </div>
+</body>
+</html>
