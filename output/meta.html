@@ -5,21 +5,21 @@
     <title>Aaron O'Leary - meta</title>
     <meta name="description" content="a poole site" />
     <meta name="keywords" content="poole" />
-    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/markdown.css" />
-    <link rel="stylesheet" type="text/css" href="/home/eeaol/web/output/pygment.css" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/markdown.css" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/pygment.css" />
 </head>
 <body>
     <div id="box">
-    <div id="header">
-         <h1>meta</h1>
-    </div>
-    <div id="menu">
-    <span class=""><a href="/home/eeaol/web/output/index.html">home</a></span>
-<span class=""><a href="/home/eeaol/web/output/code.html">code</a></span>
-<span class=""><a href="/home/eeaol/web/output/blog.html">blog</a></span>
-<span class="current"><a href="/home/eeaol/web/output/meta.html">meta</a></span>
-    </div>
-    <div id="content"><p>06/03/2012</p>
+        <div id="header">
+            <h1>meta</h1>
+        </div>
+        <div id="menu">
+        <span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/index.html">home</a></span>
+<span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/notes.html">notes</a></span>
+<span class="current"><a href="http://homepages.see.leeds.ac.uk/~eeaol/meta.html">meta</a></span>
+        </div>
+        <div id="content">
+            <p>06/03/2012</p>
 <p>I really didn't want to write any html for this site. Html is horrible.
 I know and use <a href="http://daringfireball.net/projects/markdown/">Markdown</a> and just needed something to manage my Markdown
 content.</p>
@@ -76,7 +76,7 @@ some notes written in Markdown somewhere on my machine and then do
 <span class="nv">short_filename</span><span class="o">=</span><span class="k">${</span><span class="nv">filename</span><span class="p">%.*</span><span class="k">}</span>
 
 <span class="c"># where is the webpage input dir?</span>
-<span class="nv">input_dir</span><span class="o">=</span>/home/eeaol/web/input/blog
+<span class="nv">input_dir</span><span class="o">=</span>/home/eeaol/web/input/notes
 
 <span class="c"># get the date from the file, assuming dd/mm/yyyy format and</span>
 <span class="c"># converting to yyyy-mm-dd</span>
@@ -84,7 +84,7 @@ some notes written in Markdown somewhere on my machine and then do
         sed -e <span class="s1">&#39;s/^[^0-9]*//&#39;</span> <span class="se">\</span>
             -e <span class="s1">&#39;s/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/&#39;</span><span class="k">)</span>
 
-<span class="nv">newfilepath</span><span class="o">=</span><span class="k">${</span><span class="nv">input_dir</span><span class="k">}</span>/blog.<span class="k">${</span><span class="nv">date</span><span class="k">}</span>.<span class="k">${</span><span class="nv">short_filename</span><span class="k">}</span>.md
+<span class="nv">newfilepath</span><span class="o">=</span><span class="k">${</span><span class="nv">input_dir</span><span class="k">}</span>/notes.<span class="k">${</span><span class="nv">date</span><span class="k">}</span>.<span class="k">${</span><span class="nv">short_filename</span><span class="k">}</span>.md
 cp <span class="nv">$filepath</span> <span class="nv">$newfilepath</span>
 
 <span class="c"># add the --- to the start of the file</span>
@@ -111,9 +111,13 @@ like one of <a href="https://github.com/icco/pygments-css">these</a></p>
 <code>.codehilite</code> (as this is the css class that markdown wraps code in),
 e.g</p>
 <div class="codehilite"><pre><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">&#39;s/^\.highlight/.codehilite/g&#39;</span> <span class="n">name_of_pygment_css_file</span><span class="o">.</span><span class="n">css</span>
-</pre></div></div>
+</pre></div>
+
+
+<p>The source code for this site is on <a href="https://github.com/aaren/web">Github</a>.</p>
+        </div>
     </div>
-    <div id="footer"; style="font-size: 6pt">
+    <div id="footer"; style="font-size: 8pt">
         Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a>
         &middot;
         Licensed as <a href="http://creativecommons.org/licenses/by-sa/3.0">CC-SA</a>

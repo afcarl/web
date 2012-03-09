@@ -52,7 +52,7 @@ some notes written in Markdown somewhere on my machine and then do
     short_filename=${filename%.*}
 
     # where is the webpage input dir?
-    input_dir=/home/eeaol/web/input/blog
+    input_dir=/home/eeaol/web/input/notes
 
     # get the date from the file, assuming dd/mm/yyyy format and
     # converting to yyyy-mm-dd
@@ -61,7 +61,7 @@ some notes written in Markdown somewhere on my machine and then do
                 -e 's/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/')
 
 
-    newfilepath=${input_dir}/blog.${date}.${short_filename}.md
+    newfilepath=${input_dir}/notes.${date}.${short_filename}.md
     cp $filepath $newfilepath 
 
     # add the --- to the start of the file
@@ -97,4 +97,8 @@ with all of the `.highlight` at the start of the lines replaced with
 e.g
 
     sed -i 's/^\.highlight/.codehilite/g' name_of_pygment_css_file.css
+
+The source code for this site is on [Github][].
+
+[Github]: https://github.com/aaren/web
 

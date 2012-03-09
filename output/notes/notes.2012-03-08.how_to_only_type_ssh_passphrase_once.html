@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Aaron O'Leary - notes</title>
+    <meta name="description" content="a poole site" />
+    <meta name="keywords" content="poole" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/markdown.css" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/pygment.css" />
+</head>
+<body>
+    <div id="box">
+        <div id="header">
+            <h1>notes</h1>
+        </div>
+        <div id="menu">
+        <span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/index.html">home</a></span>
+<span class="current"><a href="http://homepages.see.leeds.ac.uk/~eeaol/notes.html">notes</a></span>
+<span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/meta.html">meta</a></span>
+        </div>
+        <div id="content">
+            <p>Date: 08/03/2012</p>
+<p>Using ssh to shell into remote machines is useful. If you do it 
+a lot, typing in the password everytime becomes a bit annoying.
+Plus, any scripts that login to remote machines will need the 
+password to be supplied to them.</p>
+<p>The solution is to add your public key to the list of authorised
+keys on the remote machine. Put the contents of ~/.ssh/id_rsa.pub
+(on your machine) into ~/.ssh/authorized_keys (on the remote machine).</p>
+<p>You can now do ssh remotemachine and not have to enter a password.
+However, this isn't especially secure. It means that anyone that
+manages to access your keys has access to any of the machines you've
+added your public key to. This is very not good.</p>
+<p>The solution here is to use a ssh passphrase. Regenerate your ssh keys
+with</p>
+<div class="codehilite"><pre><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">p</span>
+</pre></div>
+
+
+<p>and accept the default locations by hitting return. Enter a passphrase
+when prompted. Make it really long. If you already have a passphrase,
+this command will let you change it without changing the keys.</p>
+<p>Great. Now we're back where we started, having to enter a really long
+passphrase every time we want to ssh. This is where ssh-agent comes in.
+In a single shell session,</p>
+<div class="codehilite"><pre><span class="nb">eval</span> <span class="nv">$</span><span class="err">(</span><span class="nv">ssh</span><span class="o">-</span><span class="n">agent</span><span class="p">)</span>
+<span class="n">ssh</span><span class="o">-</span><span class="n">add</span>
+</pre></div>
+
+
+<p>would make you enter your passphrase and then remember it for the rest of
+that session. But what about working across multiple sessions?</p>
+<p>At work I use both bash and csh on kde. We need to tell bash and csh to 
+look for the ssh-agent in a specific place. In bash,</p>
+<div class="codehilite"><pre><span class="n">export</span> <span class="n">SSH_AUTH_SOCK</span><span class="o">=</span><span class="sr">/tmp/</span><span class="nv">$USER</span><span class="o">.</span><span class="n">agent</span>
+</pre></div>
+
+
+<p>in csh,</p>
+<div class="codehilite"><pre><span class="n">set</span> <span class="n">SSH_AUTH_SOCK</span><span class="o">=</span><span class="sr">/tmp/</span><span class="nv">$USER</span><span class="o">.</span><span class="n">agent</span>
+</pre></div>
+
+
+<p>Then we need to get a single instance of ssh-agent running on login that
+will remember the passphrase for all of my shell sessions. In KDE, that
+means autostarting something, so in ~/.kde/Autostart, make a file
+called ssh-agent (name doesn't matter) that reads</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="codehilite"><pre><span class="c">#!/bin/bash</span>
+ssh-agent -a /tmp/<span class="nv">$USER</span>.agent
+ssh-add
+</pre></div>
+</td></tr></table>
+
+<p>Now on all subsequent logins we will be prompted for our passphrase
+on login and never again!</p>
+<p>I use Openbox instead of KDE at home. Autostarting in Openbox is done
+by creating a file ~/.config/openbox/autostart containing any commands
+you want to run on startup, i.e. including the above.</p>
+<p>If you don't use csh or bash or KDE or Openbox, I can't help you.</p>
+        </div>
+    </div>
+    <div id="footer"; style="font-size: 8pt">
+        Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a>
+        &middot;
+        Licensed as <a href="http://creativecommons.org/licenses/by-sa/3.0">CC-SA</a>
+    </div>
+</body>
+</html>
