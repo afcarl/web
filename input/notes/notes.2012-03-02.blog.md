@@ -2,18 +2,20 @@
 Date: 02/03/2012
 
 Meta-blogging
-=============
+-------------
 I'm starting to write things down as notes. There are numerous reasons
 for this. Matt Might's blog on [academic blogging][] has a number of
 reasons why academics should blog.
 
-[academic blogging] http://matt.might.net/articles/how-to-blog-as-an-academic/
+[academic blogging]: http://matt.might.net/articles/how-to-blog-as-an-academic/
 
 Most pertinent to me of these were 
 
 + **Blog as code repository**
   I'm starting to write more code, enough that I'm beginning to forget what
   I've written and what it does and for this to actually matter.
+  This isn't so much of a problem with my big projects, rather
+  the 20 line scripts that I write to automate some menial task.
   Posting my code would force me to factor clean code and to comment
   adequately, as well as potentially getting useful advice from other
   people.

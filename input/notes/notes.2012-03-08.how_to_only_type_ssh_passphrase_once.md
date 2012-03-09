@@ -28,6 +28,7 @@ Great. Now we're back where we started, having to enter a really long
 passphrase every time we want to ssh. This is where ssh-agent comes in.
 In a single shell session,
 
+    :::bash
     eval $(ssh-agent)
     ssh-add
 
@@ -37,10 +38,12 @@ that session. But what about working across multiple sessions?
 At work I use both bash and csh on kde. We need to tell bash and csh to 
 look for the ssh-agent in a specific place. In bash,
 
+    :::bash
     export SSH_AUTH_SOCK=/tmp/$USER.agent
 
 in csh,
 
+    :::csh
     set SSH_AUTH_SOCK=/tmp/$USER.agent
 
 Then we need to get a single instance of ssh-agent running on login that

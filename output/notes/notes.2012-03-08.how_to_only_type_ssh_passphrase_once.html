@@ -43,8 +43,8 @@ this command will let you change it without changing the keys.</p>
 <p>Great. Now we're back where we started, having to enter a really long
 passphrase every time we want to ssh. This is where ssh-agent comes in.
 In a single shell session,</p>
-<div class="codehilite"><pre><span class="nb">eval</span> <span class="nv">$</span><span class="err">(</span><span class="nv">ssh</span><span class="o">-</span><span class="n">agent</span><span class="p">)</span>
-<span class="n">ssh</span><span class="o">-</span><span class="n">add</span>
+<div class="codehilite"><pre><span class="nb">eval</span> <span class="k">$(</span>ssh-agent<span class="k">)</span>
+ssh-add
 </pre></div>
 
 
@@ -52,12 +52,12 @@ In a single shell session,</p>
 that session. But what about working across multiple sessions?</p>
 <p>At work I use both bash and csh on kde. We need to tell bash and csh to 
 look for the ssh-agent in a specific place. In bash,</p>
-<div class="codehilite"><pre><span class="n">export</span> <span class="n">SSH_AUTH_SOCK</span><span class="o">=</span><span class="sr">/tmp/</span><span class="nv">$USER</span><span class="o">.</span><span class="n">agent</span>
+<div class="codehilite"><pre><span class="nb">export </span><span class="nv">SSH_AUTH_SOCK</span><span class="o">=</span>/tmp/<span class="nv">$USER</span>.agent
 </pre></div>
 
 
 <p>in csh,</p>
-<div class="codehilite"><pre><span class="n">set</span> <span class="n">SSH_AUTH_SOCK</span><span class="o">=</span><span class="sr">/tmp/</span><span class="nv">$USER</span><span class="o">.</span><span class="n">agent</span>
+<div class="codehilite"><pre><span class="nb">set </span><span class="nv">SSH_AUTH_SOCK</span><span class="o">=</span>/tmp/<span class="nv">$USER</span>.agent
 </pre></div>
 
 
