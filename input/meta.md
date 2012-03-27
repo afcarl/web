@@ -1,7 +1,6 @@
-menu-position: 99
+menu-position: 90
 date: 06/03/2012
 ---
-06/03/2012
 
 I really didn't want to write any html for this site. Html is horrible.
 I know and use [Markdown][md] and just needed something to manage my Markdown

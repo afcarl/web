@@ -45,7 +45,9 @@ If the module uses easy_install,
     
     easy_install --prefix=$HOME/.local/ someeasyinstallablemodule
 
-TODO: Or with pip,
+Or with pip,
+
+    pip install --user somemodule
     
 
 Summary
