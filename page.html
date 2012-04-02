@@ -24,7 +24,7 @@
                 if 'index.html' in p["url"]:
                     clean_url = site_base + p["url"].split('index.html')[0]
                 else:
-                    clean_url = p["url"].split('.html')[0] + '/'
+                    clean_url = p["url"].split('.html')[0]
                 
                 print(entry % (style, htmlspecialchars(clean_url), htmlspecialchars(p["title"])))
         %-->
