@@ -20,7 +20,13 @@
             entry = '<span class="%s"><a href="%s">%s</a></span>'
             for p in mpages:
                 style = p["title"] == page["title"] and "current" or ""
-                print(entry % (style, htmlspecialchars(p["url"]), htmlspecialchars(p["title"])))
+                site_base = "http://homepages.see.leeds.ac.uk/~eeaol/"
+                if 'index.html' in p["url"]:
+                    clean_url = site_base + p["url"].split('index.html')[0]
+                else:
+                    clean_url = p["url"].split('.html')[0] + '/'
+                
+                print(entry % (style, htmlspecialchars(clean_url), htmlspecialchars(p["title"])))
         %-->
         </div>
         <div id="content">

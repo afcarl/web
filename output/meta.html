@@ -5,8 +5,8 @@
     <title>Aaron O'Leary - meta</title>
     <meta name="description" content="a poole site" />
     <meta name="keywords" content="poole" />
-    <link rel="stylesheet" type="text/css" href="/css/markdown.css" />
-    <link rel="stylesheet" type="text/css" href="/css/pygment.css" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/markdown.css" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/pygment.css" />
 </head>
 <body>
     <div id="box">
@@ -14,10 +14,10 @@
             <h1>meta</h1>
         </div>
         <div id="menu">
-        <span class=""><a href="/index.html">home</a></span>
-<span class=""><a href="/notes.html">notes</a></span>
-<span class="current"><a href="/meta.html">meta</a></span>
-<span class=""><a href="/cv.html">cv</a></span>
+        <span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/">home</a></span>
+<span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/notes/">notes</a></span>
+<span class="current"><a href="http://homepages.see.leeds.ac.uk/~eeaol/meta/">meta</a></span>
+<span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/cv/">cv</a></span>
         </div>
         <div id="content">
             <p>I really didn't want to write any html for this site. Html is horrible.
@@ -49,46 +49,122 @@ them to appear in the page we need to do a couple of things.</p>
 some notes written in Markdown somewhere on my machine and then do
 <code>webify filename</code> and have it appear in the blog section of the website.</p>
 <p><code>Webify</code> looks something like this (in bash):</p>
-<pre><code>#!bash
-filepath=$1
-# file may or may not have .extension
-filename=$(basename ${filepath})
-short_filename=${filename%.*}
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22</pre></div></td><td class="code"><div class="codehilite"><pre><span class="nv">filepath</span><span class="o">=</span><span class="nv">$1</span>
+<span class="c"># file may or may not have .extension</span>
+<span class="nv">filename</span><span class="o">=</span><span class="k">$(</span>basename <span class="k">${</span><span class="nv">filepath</span><span class="k">})</span>
+<span class="nv">short_filename</span><span class="o">=</span><span class="k">${</span><span class="nv">filename</span><span class="p">%.*</span><span class="k">}</span>
 
-# where is the webpage input dir?
-input_dir=/home/eeaol/web/input/notes
+<span class="c"># where is the webpage input dir?</span>
+<span class="nv">input_dir</span><span class="o">=</span>/home/eeaol/web/input/notes
 
-# get the date from the file, assuming dd/mm/yyyy format and
-# converting to yyyy-mm-dd
-date=$(grep '[0-9]./[0-9]./[0-9]...' $filename |\
-        sed -e 's/^[^0-9]*//' \
-            -e 's/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/')
+<span class="c"># get the date from the file, assuming dd/mm/yyyy format and</span>
+<span class="c"># converting to yyyy-mm-dd</span>
+<span class="nv">date</span><span class="o">=</span><span class="k">$(</span>grep <span class="s1">&#39;[0-9]./[0-9]./[0-9]...&#39;</span> <span class="nv">$filename</span> |<span class="se">\</span>
+        sed -e <span class="s1">&#39;s/^[^0-9]*//&#39;</span> <span class="se">\</span>
+            -e <span class="s1">&#39;s/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/&#39;</span><span class="k">)</span>
 
-newfilepath=${input_dir}/notes.${date}.${short_filename}.md
-cp $filepath $newfilepath
+<span class="nv">newfilepath</span><span class="o">=</span><span class="k">${</span><span class="nv">input_dir</span><span class="k">}</span>/notes.<span class="k">${</span><span class="nv">date</span><span class="k">}</span>.<span class="k">${</span><span class="nv">short_filename</span><span class="k">}</span>.md
+cp <span class="nv">$filepath</span> <span class="nv">$newfilepath</span>
 
-# add the --- to the start of the file
-echo "---" &gt;&gt; tmpf
-cat $newfilepath &gt;&gt; tmpf
-mv tmpf $newfilepath
+<span class="c"># add the --- to the start of the file</span>
+<span class="nb">echo</span> <span class="s2">&quot;---&quot;</span> &gt;&gt; tmpf
+cat <span class="nv">$newfilepath</span> &gt;&gt; tmpf
+mv tmpf <span class="nv">$newfilepath</span>
 rm -f tmpf
-</code></pre>
+</pre></div>
+</td></tr></table>
+
 <h2>Syntax Highlighting</h2>
 <p>This isn't enabled by default in Poole, but it is easy to get set up.</p>
 <p><a href="http://freewisdom.org/projects/python-markdown/CodeHilite">CodeHilite</a> is an included extension to python-markdown. The only
 requirement is <a href="http://pygments.org/">Pygments</a>.</p>
 <p>To get syntax highlighting you need a css for pygment to work with.
 Add this to your template page (page.html)</p>
-<pre><code>&lt;link rel="stylesheet" type="text/css" href="/style/pygment.css" /&gt;
-</code></pre>
+<div class="codehilite"><pre><span class="o">&lt;</span><span class="nb">link</span> <span class="n">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="n">type</span><span class="o">=</span><span class="s">&quot;text/css&quot;</span> <span class="n">href</span><span class="o">=</span><span class="s">&quot;style/pygment.css&quot;</span> <span class="o">/&gt;</span>
+</pre></div>
+
+
 <p>and make sure that style contains pygment.css, where this is a file
 like one of <a href="https://github.com/icco/pygments-css">these</a></p>
 <p>with all of the <code>.highlight</code> at the start of the lines replaced with
 <code>.codehilite</code> (as this is the css class that markdown wraps code in),
 e.g</p>
-<pre><code>sed -i 's/^\.highlight/.codehilite/g' name_of_pygment_css_file.css
-</code></pre>
+<div class="codehilite"><pre><span class="n">sed</span> <span class="o">-</span><span class="n">i</span> <span class="s">&#39;s/^\.highlight/.codehilite/g&#39;</span> <span class="n">name_of_pygment_css_file</span><span class="o">.</span><span class="n">css</span>
+</pre></div>
+
+
 <p>The source code for this site is on <a href="https://github.com/aaren/web">Github</a>.</p>
+<h2>Clean URLS</h2>
+<p>This was a bit more hassle, but not that much. In the template page
+there is some inline python which creates the menu automatically for
+any page that contains "menu-position" metadata. We just need to change
+this so that it points to clean urls.</p>
+<div class="codehilite"><pre>mpages = [p for p in pages if &quot;menu-position&quot; in p]
+mpages.sort(key=lambda p: int(p[&quot;menu-position&quot;]))
+entry = &#39;<span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;%s&quot;</span><span class="nt">&gt;&lt;a</span> <span class="na">href=</span><span class="s">&quot;%s&quot;</span><span class="nt">&gt;</span>%s<span class="nt">&lt;/a&gt;&lt;/span&gt;</span>&#39;
+for p in mpages:
+    style = p[&quot;title&quot;] == page[&quot;title&quot;] and &quot;current&quot; or &quot;&quot;
+    site_base = &quot;http://homepages.see.leeds.ac.uk/~eeaol/&quot;
+    if &#39;index.html&#39; in p[&quot;url&quot;]:
+        clean_url = site_base + p[&quot;url&quot;].split(&#39;index.html&#39;)[0]
+    else:
+        clean_url = p[&quot;url&quot;].split(&#39;.html&#39;)[0] + &#39;/&#39;
+
+    print(entry % (style, htmlspecialchars(clean_url), htmlspecialchars(p[&quot;title&quot;])))
+</pre></div>
+
+
+<p>We also need to modify .htaccess so that apache knows what to do with
+the clean urls that it is being passed. The following seems clunky, but
+it works.</p>
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="codehilite"><pre><span class="nb">RewriteEngine</span> <span class="k">On</span>
+<span class="nb">RewriteBase</span> /~eeaol/
+
+<span class="nb">RewriteCond</span> %{REQUEST_FILENAME}/index.html -f
+<span class="nb">RewriteRule</span> ^(.+)/$ $1/index.html [L]
+
+<span class="nb">RewriteCond</span> %{REQUEST_FILENAME} !-f
+<span class="nb">RewriteRule</span> .*[^/]$ %{REQUEST_URI}/ [L,R=301]
+
+<span class="nb">RewriteCond</span> %{REQUEST_FILENAME} !-f
+<span class="nb">RewriteCond</span> $1.html -U
+<span class="nb">RewriteRule</span> ^(.+)/$ $1.html [L]
+</pre></div>
+</td></tr></table>
+
+<p><a href="http://corz.org/serv/tricks/htaccess2.php">More</a> on <a href="http://www.codingforums.com/showthread.php?t=215977">htaccess</a></p>
         </div>
     </div>
 </body>

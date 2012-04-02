@@ -5,8 +5,8 @@
     <title>Aaron O'Leary - notes</title>
     <meta name="description" content="a poole site" />
     <meta name="keywords" content="poole" />
-    <link rel="stylesheet" type="text/css" href="/css/markdown.css" />
-    <link rel="stylesheet" type="text/css" href="/css/pygment.css" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/markdown.css" />
+    <link rel="stylesheet" type="text/css" href="http://homepages.see.leeds.ac.uk/~eeaol/css/pygment.css" />
 </head>
 <body>
     <div id="box">
@@ -14,10 +14,10 @@
             <h1>notes</h1>
         </div>
         <div id="menu">
-        <span class=""><a href="/index.html">home</a></span>
-<span class="current"><a href="/notes.html">notes</a></span>
-<span class=""><a href="/meta.html">meta</a></span>
-<span class=""><a href="/cv.html">cv</a></span>
+        <span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/">home</a></span>
+<span class="current"><a href="http://homepages.see.leeds.ac.uk/~eeaol/notes/">notes</a></span>
+<span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/meta/">meta</a></span>
+<span class=""><a href="http://homepages.see.leeds.ac.uk/~eeaol/cv/">cv</a></span>
         </div>
         <div id="content">
             <p>Date: 08/03/2012</p>
@@ -34,37 +34,46 @@ manages to access your keys has access to any of the machines you've
 added your public key to. This is very not good.</p>
 <p>The solution here is to use a ssh passphrase. Regenerate your ssh keys
 with</p>
-<pre><code>ssh-keygen -p
-</code></pre>
+<div class="codehilite"><pre><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">p</span>
+</pre></div>
+
+
 <p>and accept the default locations by hitting return. Enter a passphrase
 when prompted. Make it really long. If you already have a passphrase,
 this command will let you change it without changing the keys.</p>
 <p>Great. Now we're back where we started, having to enter a really long
 passphrase every time we want to ssh. This is where ssh-agent comes in.
 In a single shell session,</p>
-<pre><code>:::bash
-eval $(ssh-agent)
+<div class="codehilite"><pre><span class="nb">eval</span> <span class="k">$(</span>ssh-agent<span class="k">)</span>
 ssh-add
-</code></pre>
+</pre></div>
+
+
 <p>would make you enter your passphrase and then remember it for the rest of
 that session. But what about working across multiple sessions?</p>
 <p>At work I use both bash and csh on kde. We need to tell bash and csh to 
 look for the ssh-agent in a specific place. In bash,</p>
-<pre><code>:::bash
-export SSH_AUTH_SOCK=/tmp/$USER.agent
-</code></pre>
+<div class="codehilite"><pre><span class="nb">export </span><span class="nv">SSH_AUTH_SOCK</span><span class="o">=</span>/tmp/<span class="nv">$USER</span>.agent
+</pre></div>
+
+
 <p>in csh,</p>
-<pre><code>:::csh
-set SSH_AUTH_SOCK=/tmp/$USER.agent
-</code></pre>
+<div class="codehilite"><pre><span class="nb">set </span><span class="nv">SSH_AUTH_SOCK</span><span class="o">=</span>/tmp/<span class="nv">$USER</span>.agent
+</pre></div>
+
+
 <p>Then we need to get a single instance of ssh-agent running on login that
 will remember the passphrase for all of my shell sessions. In KDE, that
 means autostarting something, so in ~/.kde/Autostart, make a file
 called ssh-agent (name doesn't matter) that reads</p>
-<pre><code>#!/bin/bash
-ssh-agent -a /tmp/$USER.agent
+<table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="codehilite"><pre><span class="c">#!/bin/bash</span>
+ssh-agent -a /tmp/<span class="nv">$USER</span>.agent
 ssh-add
-</code></pre>
+</pre></div>
+</td></tr></table>
+
 <p>Now on all subsequent logins we will be prompted for our passphrase
 on login and never again!</p>
 <p>I use Openbox instead of KDE at home. Autostarting in Openbox is done

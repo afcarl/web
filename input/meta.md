@@ -101,3 +101,46 @@ The source code for this site is on [Github][].
 
 [Github]: https://github.com/aaren/web
 
+Clean URLS
+----------
+
+This was a bit more hassle, but not that much. In the template page
+there is some inline python which creates the menu automatically for
+any page that contains "menu-position" metadata. We just need to change
+this so that it points to clean urls.
+
+    mpages = [p for p in pages if "menu-position" in p]
+    mpages.sort(key=lambda p: int(p["menu-position"]))
+    entry = '<span class="%s"><a href="%s">%s</a></span>'
+    for p in mpages:
+        style = p["title"] == page["title"] and "current" or ""
+        site_base = "http://homepages.see.leeds.ac.uk/~eeaol/"
+        if 'index.html' in p["url"]:
+            clean_url = site_base + p["url"].split('index.html')[0]
+        else:
+            clean_url = p["url"].split('.html')[0] + '/'
+        
+        print(entry % (style, htmlspecialchars(clean_url), htmlspecialchars(p["title"])))
+
+We also need to modify .htaccess so that apache knows what to do with
+the clean urls that it is being passed. The following seems clunky, but
+it works.
+
+    #!apache
+    RewriteEngine On
+    RewriteBase /~eeaol/
+
+    RewriteCond %{REQUEST_FILENAME}/index.html -f
+    RewriteRule ^(.+)/$ $1/index.html [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule .*[^/]$ %{REQUEST_URI}/ [L,R=301]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond $1.html -U
+    RewriteRule ^(.+)/$ $1.html [L]
+
+[More][corz] on [htaccess][]
+
+[corz]: http://corz.org/serv/tricks/htaccess2.php
+[htaccess]: http://www.codingforums.com/showthread.php?t=215977
