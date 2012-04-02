@@ -21,6 +21,8 @@ RewriteCond $1.html -f
 # RewriteCond $1.html -U
 RewriteRule ^(.+)/$ $1.html [L]
 
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^(.+)/$ $1.html [L]
 
 # the above two phrases work in that they redirect traffic
 # without a trailing slash. however, entering a non-existent
