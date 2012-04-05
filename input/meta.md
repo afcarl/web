@@ -126,19 +126,34 @@ We also need to modify .htaccess so that apache knows what to do with
 the clean urls that it is being passed. The following seems clunky, but
 it works.
 
+
     #!apache
     RewriteEngine On
     RewriteBase /~eeaol/
 
+    # If there is an index.html in the root of the thing I'm asking
+    # for, load it up.
     RewriteCond %{REQUEST_FILENAME}/index.html -f
     RewriteRule ^(.+)/$ $1/index.html [L]
-
+    
+    # If it isn't a file, put a slash on it
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule .*[^/]$ %{REQUEST_URI}/ [L,R=301]
 
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond $1.html -U
+    # If there is a corresponding .html and it isn't a directory,
+    # remove the slash and add .html
+    RewriteCond %{REQUEST_FILENAME}.html -f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.+)/$ $1.html [L]
+
+This means that directories on the site can be accessed naked
+unless they have an index.html in them.
+
+Files on the site with no extension can still be accessed and
+a trailing slash will not be added.
+
+Pages can be requested with and without the trailing slash,
+but the trailing slash will always be added on.
 
 [More][corz] on [htaccess][]
 
