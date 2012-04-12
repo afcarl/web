@@ -1,9 +1,7 @@
+title: User install of Python modules
 post: single user python imports
 date: 2012-03-06
 ---
-
-User install of Python modules
-------------------------------
 
 This came about because I wanted the [python-markdown][py-md] for
 generating the content on this site using [Poole][] or [Chisel][].
@@ -51,16 +49,15 @@ Or with pip,
     pip install --user somemodule
     
 
-Summary
--------
+### Summary ###
 
 Install the markdown python module without admin (root) rights like
 this:
 
     cd ~/make
-    wget http://pypi.python.org/packages/source/M/Markdown/Markdown-2.1.1.tar.gz#
+    wget http://pypi.python.org/packages/source/M/Markdown/Markdown-2.1.1.tar.gz
     tar xvzf Markdown-2.1.1.tar.gz
-    cd Markdown-2.1.1.tar.gz
+    cd Markdown-2.1.1
     python setup.py install --user
 
     

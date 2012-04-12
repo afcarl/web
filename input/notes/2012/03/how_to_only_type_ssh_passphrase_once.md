@@ -1,3 +1,4 @@
+title: Automatic ssh everywhere
 post: how to only type ssh passphrase once
 date: 2012-03-08
 ---
@@ -61,3 +62,24 @@ by creating a file ~/.config/openbox/autostart containing any commands
 you want to run on startup, i.e. including the above.
 
 If you don't use csh or bash or KDE or Openbox, I can't help you.
+
+### UPDATE: Make it work on an ssh login ###
+
+If we login by ssh, the KDE autostart won't be run and we'll be back to
+having to type in a long passphrase all the time. So in whatever shell
+we log into by default, e.g. bash, just add a command to .bashrc that 
+starts a new ssh-agent only if this is a ssh login:
+
+    if [[ -n $SSH_CONNECTION ]]; then
+        ssh-agent -a /tmp/$USER.agent
+    fi
+
+Or in csh:
+
+    if ( ( $?SSH_CONNECTION ) ) then
+        ssh-agent -a /tmp/$USER.agent
+    endif
+
+Then just run `ssh-add` at the start of the session.
+
+[Superuser question](http://superuser.com/questions/355029/linux-how-to-automatically-run-commands-on-ssh-login)

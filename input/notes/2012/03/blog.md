@@ -1,9 +1,8 @@
+title: meta blogging
 post: blog
 date: 2012-03-02
 ---
 
-Meta-blogging
--------------
 I'm starting to write things down as notes. There are numerous reasons
 for this. Matt Might's blog on [academic blogging][] has a number of
 reasons why academics should blog.
@@ -37,8 +36,8 @@ However, probably the most important reason for writing is to *practice*
 *writing*. At some point I'm supposed to submit up to 300,000 words as
 a thesis. It would be nice not to have to do this in a month.
 
-I saw a good documentary the other day about a Slovenian philosopher
-called Zizek. Some people think he is a big deal. He says lots of
-things, mostly interesting. One of those things was his advice on
-writing. He said that he never 'writes'; rather, he makes lots of
-notes and then he edits them.
+I saw a good documentary the other day about a Slovenian philosopher called
+Zizek. Some people think he is a big deal, others just roll their eyes when you
+mention him. He says lots of things, mostly interesting. One of those things
+was his advice on writing. He said that he never 'writes'; rather, he makes
+lots of notes and then he edits them.
