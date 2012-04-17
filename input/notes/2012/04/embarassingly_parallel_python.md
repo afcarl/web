@@ -1,8 +1,6 @@
 title: Embarassing problems in python
 post: embarassingly parallel python
 date: 2012-04-10
-2012-04-12: putting `p.close()` on the end is quite important, as it
-2012-04-12): #####
 ---
 
 I have an embarassing problem... an [embarassingly parallel problem][epp]!

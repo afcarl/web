@@ -1,8 +1,6 @@
 title: Setting up Enthought in a VirtualEnv
-post: virtualenv-enthought
+post: virtualenv with enthought
 date: 2012-04-02
-2009/v-02-11irtualenv-pip-basics/
-2003/g-03-11etting-epd-to-play-nicely-with-virtual-environments/
 ---
 
 In my work environment, there are a load of pre compiled applications
