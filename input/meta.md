@@ -33,38 +33,57 @@ Great. I know Markdown and Python and I want a simple site!
 If we want to put posts into the notes section of the site and want
 them to appear in the page we need to do a couple of things.
 
-+ filename needs to be in the format `blog.yyyy-mm-dd.post_title.md`
-+ The file needs to have `---` at the start.
++ file header needs to contain a 'post:' entry
++ file header needs to be terminated by `---`
 
-I don't know why the second is the case, but that's what works.
+I don't want to write these into the original notes to keep it clean and
+maintain compatibility with multimarkdown.  
 
-This is something that is easily scripted. The idea is that I'll have
-some notes written in Markdown somewhere on my machine and then do
-`webify filename` and have it appear in the blog section of the website.
+This is something that is easily scripted. The idea is that I'll have some
+notes written in Markdown somewhere on my machine and then do `webify filename`
+and have it appear in the blog section of the website.
 
 `Webify` looks something like this (in bash):
 
-    #!bash
+    #!/bin/bash
     filepath=$1
     # file may or may not have .extension
     filename=$(basename ${filepath})
     short_filename=${filename%.*}
 
     # where is the webpage input dir?
-    input_dir=/home/eeaol/web/input/notes
+    input_dir=$HOME/web/input/notes
 
     # get the date from the file, assuming dd/mm/yyyy format and
     # converting to yyyy-mm-dd
-    date=$(grep '[0-9]./[0-9]./[0-9]...' $filename |\
+    date=$(grep -i -m 1 'date: [0-9]./[0-9]./[0-9]...' $filename |\
             sed -e 's/^[^0-9]*//' \
                 -e 's/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/')
 
+    title=$(grep -i -m 1 'title: .*' $filename)
 
-    newfilepath=${input_dir}/notes.${date}.${short_filename}.md
-    cp $filepath $newfilepath 
+    year=${date:0:4}
+    month=${date:5:2}
 
-    # add the --- to the start of the file
-    echo "---" >> tmpf
+    newdir=${input_dir}/$year/$month
+    mkdir -p $newdir
+    newfilepath=$newdir/${short_filename}.md
+    cp $filepath $newfilepath
+
+    # remove the old title from the file
+    #sed -i '/title:.*/d' $newfilepath
+    # remove the old date from the file
+    #sed -i '/[Dd]ate: [0-9].\/[0-9].\/[0-9].../d' $newfilepath
+    # remove all the metadata from the file (it has to be separated
+    # from the content by a blank line)
+    sed -i '1,/^$/d' $newfilepath
+
+    # add the metadata to the start of the file
+    post=$(echo $short_filename | sed 's/[_-]/ /g')
+    echo "$title" >> tmpf
+    echo "post: $post" >> tmpf
+    echo "date: $date" >> tmpf
+    echo -e "---\n" >> tmpf
     cat $newfilepath >> tmpf
     mv tmpf $newfilepath
     rm -f tmpf
@@ -97,9 +116,7 @@ e.g
 
     sed -i 's/^\.highlight/.codehilite/g' name_of_pygment_css_file.css
 
-The source code for this site is on [Github][].
 
-[Github]: https://github.com/aaren/web
 
 Clean URLS
 ----------
@@ -109,6 +126,7 @@ there is some inline python which creates the menu automatically for
 any page that contains "menu-position" metadata. We just need to change
 this so that it points to clean urls.
 
+    #!python
     mpages = [p for p in pages if "menu-position" in p]
     mpages.sort(key=lambda p: int(p["menu-position"]))
     entry = '<span class="%s"><a href="%s">%s</a></span>'
@@ -135,7 +153,7 @@ it works.
     # for, load it up.
     RewriteCond %{REQUEST_FILENAME}/index.html -f
     RewriteRule ^(.+)/$ $1/index.html [L]
-    
+
     # If it isn't a file, put a slash on it
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule .*[^/]$ %{REQUEST_URI}/ [L,R=301]
@@ -156,6 +174,41 @@ Pages can be requested with and without the trailing slash,
 but the trailing slash will always be added on.
 
 [More][corz] on [htaccess][]
-
 [corz]: http://corz.org/serv/tricks/htaccess2.php
 [htaccess]: http://www.codingforums.com/showthread.php?t=215977
+
+Makefile
+--------
+
+I made a makefile for the site to quicken things up. I can easily rebuild the
+site with `make build`, then push it out with `make deploy`. Here's the file
+anyway:
+
+    #!make
+    build: 
+        poole --build --md-ext='codehilite' --base-url="http://homepages.see.leeds.ac.uk/~eeaol/"
+        cp htaccess output/.htaccess
+
+    test:
+        poole --build --md-ext='codehilite' --base-url="/home/eeaol/web/output/"
+        cp htaccess output/.htaccess
+
+    deploy:
+        cp -rv output/. /home/eeaol/public_html/
+
+    redeploy: build deploy
+
+I also scripted a command in `~/bin`, `reweb`, that runs `make redeploy` for
+this project from anywhere on my machine, so that uploading new content to
+[notes][] is as simple as
+
+    webify newcontent 
+    reweb
+
+Which satisfies my need to do everything in the command line.
+
+[notes]: http://homepages.see.leeds.ac.uk/~eeaol/notes/
+
+The source code for this site is on [Github][].
+
+[Github]: https://github.com/aaren/web
