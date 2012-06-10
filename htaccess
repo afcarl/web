@@ -24,3 +24,7 @@ RewriteRule ^(.+)/$ $1.html [L]
 #
 # Pages can be requested with and without the trailing slash,
 # but the trailing slash will always be added on.
+
+# Correct mime types for embedding videos
+AddType video/ogg .ogv
+AddType video/mp4 .mp4
