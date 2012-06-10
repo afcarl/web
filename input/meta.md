@@ -30,6 +30,8 @@ A bit more searching and I came across [Poole], which says
 
 Great. I know Markdown and Python and I want a simple site!
 
+### Posts ###
+
 If we want to put posts into the notes section of the site and want
 them to appear in the page we need to do a couple of things.
 
@@ -89,8 +91,7 @@ and have it appear in the blog section of the website.
     rm -f tmpf
 
 
-Syntax Highlighting
--------------------
+### Syntax Highlighting ###
 
 This isn't enabled by default in Poole, but it is easy to get set up.
 
@@ -118,8 +119,7 @@ e.g
 
 
 
-Clean URLS
-----------
+### Clean URLS ###
 
 This was a bit more hassle, but not that much. In the template page
 there is some inline python which creates the menu automatically for
@@ -177,8 +177,7 @@ but the trailing slash will always be added on.
 [corz]: http://corz.org/serv/tricks/htaccess2.php
 [htaccess]: http://www.codingforums.com/showthread.php?t=215977
 
-Makefile
---------
+### Makefile ###
 
 I made a makefile for the site to quicken things up. I can easily rebuild the
 site with `make build`, then push it out with `make deploy`. Here's the file
