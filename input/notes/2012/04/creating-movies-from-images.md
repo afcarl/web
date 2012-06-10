@@ -1,4 +1,4 @@
-title: How to make movies from still images
+title: How to make movies from images
 post: creating movies from images
 date: 2012-04-17
 ---
@@ -55,7 +55,7 @@ you:
     outdir=$2
     ext=$3
     i=0
-    for f in $(ls ${inf}/*${ext}); do
+    for f in $(ls ${indir}/*${ext}); do
         newf=$(printf "%04d.%s" ${i} ${ext})
         cp -v $f ${outdir}/${newf}
         let i=i+1
