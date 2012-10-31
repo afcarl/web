@@ -17,8 +17,9 @@ title=$(grep -i -m 1 'title: .*' $filename)
 
 year=${date:0:4}
 month=${date:5:2}
+day=${date:8:2}
 
-newdir=${input_dir}/$year/$month
+newdir=${input_dir}/$year/$month/$day
 mkdir -p $newdir
 newfilepath=$newdir/${short_filename}.md
 cp $filepath $newfilepath
