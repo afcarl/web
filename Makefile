@@ -7,6 +7,6 @@ test:
 	cp htaccess output/.htaccess
 
 deploy:
-	cp -rv output/. /home/eeaol/public_html/
+	cp -rv output/* /home/eeaol/public_html/
 
 redeploy: build deploy
