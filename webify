@@ -1,0 +1,43 @@
+#!/bin/bash
+filepath=$1
+# file may or may not have .extension
+filename=$(basename ${filepath})
+short_filename=${filename%.*}
+
+# where is the webpage input dir?
+input_dir=/home/eeaol/web/input/notes
+
+# get the date from the file, assuming dd/mm/yyyy format and
+# converting to yyyy-mm-dd
+date=$(grep -i -m 1 'date: [0-9]./[0-9]./[0-9]...' $filename |\
+        sed -e 's/^[^0-9]*//' \
+            -e 's/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/')
+
+title=$(grep -i -m 1 'title: .*' $filename)
+
+year=${date:0:4}
+month=${date:5:2}
+
+newdir=${input_dir}/$year/$month
+mkdir -p $newdir
+newfilepath=$newdir/${short_filename}.md
+cp $filepath $newfilepath
+
+# remove the old title from the file
+#sed -i '/title:.*/d' $newfilepath
+# remove the old date from the file
+#sed -i '/[Dd]ate: [0-9].\/[0-9].\/[0-9].../d' $newfilepath
+# remove all the metadata from the file (it has to be separated
+# from the content by a blank line)
+sed -i '1,/^$/d' $newfilepath
+
+# add the metadata to the start of the file
+post=$(echo $short_filename | sed 's/[_-]/ /g')
+echo "$title" >> tmpf
+echo "post: $post" >> tmpf
+echo "date: $date" >> tmpf
+echo -e "---\n" >> tmpf
+cat $newfilepath >> tmpf
+mv tmpf $newfilepath
+rm -f tmpf
+
