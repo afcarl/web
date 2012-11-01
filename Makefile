@@ -1,5 +1,11 @@
-build: 
+build: buildabs
+
+buildabs:
 	poole --build --md-ext='codehilite(guess_lang=False)' --base-url="http://homepages.see.leeds.ac.uk/~eeaol/"
+	cp htaccess output/.htaccess
+
+buildrel:
+	poole --build --md-ext='codehilite(guess_lang=False)' 
 	cp htaccess output/.htaccess
 
 test:
