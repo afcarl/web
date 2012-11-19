@@ -116,7 +116,9 @@ e.g
 
     sed -i 's/^\.highlight/.codehilite/g' name_of_pygment_css_file.css
 
+Then build poole with 
 
+    poole --build --md-ext='codehilite(guess_lang=False)'
 
 ### Clean URLS ###
 
@@ -240,3 +242,9 @@ Now in the template `page.html` we add to the header:
 
 Now in the markdown source, inline Latex is surrounded by `$ ... $` and for
 equations we use `$$ .. $$`.
+
+We then have to build poole with 
+
+    poole --build --md-ext='codehilite(guess_lang=False)' --md-ext='mathjax()
+
+Here's the [commit](https://github.com/aaren/web/commit/b9feafb).
