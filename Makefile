@@ -5,7 +5,7 @@ buildabs:
 	cp htaccess output/.htaccess
 
 buildrel:
-	poole --build --md-ext='codehilite(guess_lang=False)' 
+	poole --build --md-ext='codehilite(guess_lang=False)' --md-ext='mathjax()' 
 	cp htaccess output/.htaccess
 
 test:

@@ -210,3 +210,33 @@ Which satisfies my need to do everything in the command line.
 The source code for this site is on [Github][].
 
 [Github]: https://github.com/aaren/web
+
+### Maths ###
+
+Implemented with [MathJax][]. We're going to use [python-markdown-mathjax][].
+Install it like this (assuming [python-markdown][] is already installed):
+
+    md_ext_dir=$(python -c 'import markdown; print markdown.__path__[0]')
+    cd ${md_ext_dir}/extensions
+    wget https://github.com/mayoff/python-markdown-mathjax/blob/master/mdx_mathjax.py
+    mv mdx_mathjax.py mathjax.py
+
+[MathJax]: http://www.mathjax.org/
+[python-markdown-mathjax]: https://github.com/mayoff/python-markdown-mathjax
+[python-markdown]: http://pypi.python.org/pypi/Markdown/
+
+Now in the template `page.html` we add to the header:
+
+    ::html
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+                    "tex2jax": { inlineMath: [ [ '$', '$' ] ] }
+                           });
+    </script>
+
+    <script type="text/javascript"
+    src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
+    </script>
+
+Now in the markdown source, inline Latex is surrounded by `$ ... $` and for
+equations we use `$$ .. $$`.
