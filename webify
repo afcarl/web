@@ -9,11 +9,11 @@ input_dir=/home/eeaol/web/input/notes
 
 # get the date from the file, assuming dd/mm/yyyy format and
 # converting to yyyy-mm-dd
-date=$(grep -i -m 1 'date: [0-9]./[0-9]./[0-9]...' $filename |\
+date=$(grep -i -m 1 'date: [0-9]./[0-9]./[0-9]...' $filepath |\
         sed -e 's/^[^0-9]*//' \
             -e 's/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/')
 
-title=$(grep -i -m 1 'title: .*' $filename)
+title=$(grep -i -m 1 'title: .*' $filepath)
 
 year=${date:0:4}
 month=${date:5:2}
