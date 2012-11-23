@@ -51,11 +51,16 @@
             {{ __content__ }}
         </div>
     </div>
-    <div id="footer" style="font-size:8px">
+    <div id="footer" style="font-size:10px">
+        <!--%
+            md_url = page["url"].split('.html')[0] + '.md'
+            md_url_form = '<a href="%s">%s</a>'
+            print md_url_form % (md_url, 'raw file')
+        %-->
+        <!-- Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a> -->
+        &middot;
         Aaron O'Leary 2012
         &middot;
-        <!-- Built with <a href="http://bitbucket.org/obensonne/poole">Poole</a> -->
-        <!-- &middot; -->
         <a href="http://homepages.see.leeds.ac.uk/~eeaol/about">About</a>
         <!-- Licensed as <a href="http://creativecommons.org/licenses/by-sa/3.0">CC-SA</a> -->
     </div>

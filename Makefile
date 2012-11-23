@@ -2,10 +2,12 @@ build: buildabs
 
 buildabs:
 	poole --build --md-ext='codehilite(guess_lang=False)' --base-url="http://homepages.see.leeds.ac.uk/~eeaol/"
+	cp -r input/* output/ # so that there is plaintext on the site
 	cp htaccess output/.htaccess
 
 buildrel:
 	poole --build --md-ext='codehilite(guess_lang=False)' --md-ext='mathjax()' 
+	cp -r input/* output/ # so that there is plaintext on the site
 	cp htaccess output/.htaccess
 
 test:
