@@ -38,6 +38,16 @@
         %-->
         </div>
         <div id="content">
+            <div id="date" align="right">
+                <em><!--%
+                if "post" in page:
+                    from datetime import datetime
+                    date =  datetime.strptime(page["date"], "%Y-%m-%d").strftime("%B %d, %Y")
+                    date_header = 'Posted on %s' % date
+                    print date_header
+                %-->
+                </em>
+            </div>
             {{ __content__ }}
         </div>
     </div>
