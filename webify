@@ -15,14 +15,8 @@ date=$(grep -i -m 1 'date: [0-9]./[0-9]./[0-9]...' $filepath |\
 
 title=$(grep -i -m 1 'title: .*' $filepath)
 
-year=${date:0:4}
-month=${date:5:2}
-day=${date:8:2}
-
-newdir=${input_dir}/$year/$month/$day
-mkdir -p $newdir
-newfilepath=$newdir/${short_filename}.md
-cp $filepath $newfilepath
+# make a temporary container for the content
+cat $filepath >> tmpfc
 
 # remove the old title from the file
 # sed -i '/title:.*/d' $newfilepath
@@ -30,7 +24,7 @@ cp $filepath $newfilepath
 # sed -i '/[Dd]ate: [0-9].\/[0-9].\/[0-9].../d' $newfilepath
 # remove all the metadata from the file (it has to be separated
 # from the content by a blank line)
-sed -i '1,/^$/d' $newfilepath
+sed -i '1,/^$/d' tmpfc
 
 # add the metadata to the start of the file
 post=$(echo $short_filename | sed 's/[_-]/ /g')
@@ -38,7 +32,22 @@ echo "$title" >> tmpf
 echo "post: $post" >> tmpf
 echo "date: $date" >> tmpf
 echo -e "---\n" >> tmpf
-cat $newfilepath >> tmpf
-mv tmpf $newfilepath
-rm -f tmpf
+cat tmpfc >> tmpf
+# tmpf is now full of header and content
 
+# create directories for the file to live in 
+year=${date:0:4}
+month=${date:5:2}
+day=${date:8:2}
+
+newdaydir=${input_dir}/$year/$month/$day
+newmonthdir=${input_dir}/$year/$month
+mkdir -p $newdaydir
+mkdir -p $newmonthdir
+newdayfilepath=$newdaydir/${short_filename}.md
+newmonthfilepath=$newmonthdir/${short_filename}.md
+cp tmpf $newdayfilepath
+cp tmpf $newmonthfilepath
+
+# clean up
+rm -f tmpf tmpfc
