@@ -1,53 +1,60 @@
 #!/bin/bash
-filepath=$1
-# file may or may not have .extension
-filename=$(basename ${filepath})
-short_filename=${filename%.*}
 
-# where is the webpage input dir?
-input_dir=/home/eeaol/web/input/notes
+function webifyfile {
+    filepath=$1
+    # file may or may not have .extension
+    filename=$(basename ${filepath})
+    short_filename=${filename%.*}
 
-# get the date from the file, assuming dd/mm/yyyy format and
-# converting to yyyy-mm-dd
-date=$(grep -i -m 1 'date: [0-9]./[0-9]./[0-9]...' $filepath |\
-        sed -e 's/^[^0-9]*//' \
-            -e 's/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/')
+    # where is the webpage input dir?
+    input_dir=/home/eeaol/web/input/notes
 
-title=$(grep -i -m 1 'title: .*' $filepath)
+    # get the date from the file, assuming dd/mm/yyyy format and
+    # converting to yyyy-mm-dd
+    date=$(grep -i -m 1 'date: [0-9]./[0-9]./[0-9]...' $filepath |\
+            sed -e 's/^[^0-9]*//' \
+                -e 's/\(..\)\/\(..\)\/\(....\)/\3-\2-\1/')
 
-# make a temporary container for the content
-cat $filepath >> tmpfc
+    title=$(grep -i -m 1 'title: .*' $filepath)
 
-# remove the old title from the file
-# sed -i '/title:.*/d' $newfilepath
-# remove the old date from the file
-# sed -i '/[Dd]ate: [0-9].\/[0-9].\/[0-9].../d' $newfilepath
-# remove all the metadata from the file (it has to be separated
-# from the content by a blank line)
-sed -i '1,/^$/d' tmpfc
+    # make a temporary container for the content
+    cat $filepath >> tmpfc
 
-# add the metadata to the start of the file
-post=$(echo $short_filename | sed 's/[_-]/ /g')
-echo "$title" >> tmpf
-echo "post: $post" >> tmpf
-echo "date: $date" >> tmpf
-echo -e "---\n" >> tmpf
-cat tmpfc >> tmpf
-# tmpf is now full of header and content
+    # remove the old title from the file
+    # sed -i '/title:.*/d' $newfilepath
+    # remove the old date from the file
+    # sed -i '/[Dd]ate: [0-9].\/[0-9].\/[0-9].../d' $newfilepath
+    # remove all the metadata from the file (it has to be separated
+    # from the content by a blank line)
+    sed -i '1,/^$/d' tmpfc
 
-# create directories for the file to live in 
-year=${date:0:4}
-month=${date:5:2}
-day=${date:8:2}
+    # add the metadata to the start of the file
+    post=$(echo $short_filename | sed 's/[_-]/ /g')
+    echo "$title" >> tmpf
+    echo "post: $post" >> tmpf
+    echo "date: $date" >> tmpf
+    echo -e "---\n" >> tmpf
+    cat tmpfc >> tmpf
+    # tmpf is now full of header and content
 
-newdaydir=${input_dir}/$year/$month/$day
-newmonthdir=${input_dir}/$year/$month
-mkdir -p $newdaydir
-mkdir -p $newmonthdir
-newdayfilepath=$newdaydir/${short_filename}.md
-newmonthfilepath=$newmonthdir/${short_filename}.md
-cp tmpf $newdayfilepath
-cp tmpf $newmonthfilepath
+    # create directories for the file to live in 
+    year=${date:0:4}
+    month=${date:5:2}
+    day=${date:8:2}
 
-# clean up
-rm -f tmpf tmpfc
+    newdaydir=${input_dir}/$year/$month/$day
+    newmonthdir=${input_dir}/$year/$month
+    mkdir -p $newdaydir
+    mkdir -p $newmonthdir
+    newdayfilepath=$newdaydir/${short_filename}.md
+    newmonthfilepath=$newmonthdir/${short_filename}.md
+    cp tmpf $newdayfilepath
+    cp tmpf $newmonthfilepath
+
+    # clean up
+    rm -f tmpf tmpfc
+}
+
+for f in $*; do
+    webifyfile $f;
+done
