@@ -1,7 +1,7 @@
 build: buildabs
 
 buildabs:
-	poole --build --md-ext='codehilite(guess_lang=False)' --base-url="http://homepages.see.leeds.ac.uk/~eeaol/"
+	poole --build --md-ext='codehilite(guess_lang=False)' --md-ext='footnotes' --base-url="http://homepages.see.leeds.ac.uk/~eeaol/"
 	cp -r input/* output/ # so that there is plaintext on the site
 	cp htaccess output/.htaccess
 
