@@ -4,6 +4,36 @@ except ImportError:
     print("No bibliography support")
 
 import re
+from datetime import datetime
+import os.path
+
+
+_SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+%s
+</urlset>
+"""
+
+_SITEMAP_URL = """
+<url>
+    <loc>%s/%s</loc>
+    <lastmod>%s</lastmod>
+    <changefreq>%s</changefreq>
+    <priority>%s</priority>
+</url>
+"""
+
+def hook_preconvert_sitemap():
+    """Generate Google sitemap.xml file."""
+    date = datetime.strftime(datetime.now(), "%Y-%m-%d")
+    urls = []
+    for p in pages:
+        urls.append(_SITEMAP_URL % (options.base_url.rstrip('/'), p.url, date,
+                    p.get("changefreq", "monthly"), p.get("priority", "0.8")))
+    fname = os.path.join(options.project, "output", "sitemap.xml")
+    fp = open(fname, 'w')
+    fp.write(_SITEMAP % "".join(urls))
+    fp.close()
 
 
 #-------------------------------CITATIONS----------------------#
