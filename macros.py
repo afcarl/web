@@ -10,6 +10,12 @@ import re
 # This is a big hack. It is reliant on pybtex being available to
 # do the bibtex parsing. It will break if you try and reference
 # things that don't have the appropriate bibtex entries.
+#
+# TODO: handle exceptions.
+#       - missing pybtex
+#       - missing bibfile
+#       - missing citation fields
+#
 # Aaron O'Leary Nov 2012
 #
 # To configure, play around in ref_style and bib_entry_style for
@@ -20,7 +26,7 @@ import re
 # hyperlinking.
 
 # This is the bibtex file with all of your references in.
-BIBFILE = 'library.bib'
+BIBFILE = '/home/eeaol/papers/library.bib'
 
 def hook_preconvert_citations():
     """Replace [#citekey] with html"""
@@ -40,7 +46,7 @@ def ref_style():
     # author, name
     rs = "({author}, {year})"
     # numbered citations
-    rs = "[{cite_no}]"
+    # rs = "[{cite_no}]"
     return rs
 
 def bib_entry_style():
