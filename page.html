@@ -9,7 +9,9 @@
     <link rel="stylesheet" type="text/css" href="css/pygment.css" />
     <script type="text/x-mathjax-config">
       MathJax.Hub.Config({
-                "tex2jax": { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+                "tex2jax": { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+                TeX: { equationNumbers: { autoNumber: "AMS" } },
+                MMLorHTML: { prefer: { Firefox: "HTML" } }
       });
     </script>
     <script type="text/javascript"
@@ -28,9 +30,10 @@
             entry = '<span class="%s"><a href="%s">%s</a></span>'
             for p in mpages:
                 style = p["title"] == page["title"] and "current" or ""
-                site_base = "http://homepages.see.leeds.ac.uk/~eeaol/"
+                site_base = options.base_url
                 if 'index.html' in p["url"]:
                     clean_url = site_base + p["url"].split('index.html')[0]
+                    # clean_url = p["url"].split('index.html')[0]
                 else:
                     clean_url = p["url"].split('.html')[0]
                 

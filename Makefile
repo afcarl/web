@@ -18,3 +18,12 @@ deploy:
 	cp -rv output/* /home/eeaol/public_html/
 
 redeploy: build deploy
+
+github:
+	poole --build --md-ext='codehilite(guess_lang=False)' --md-ext='footnotes' --base-url="aaren.github.com/"
+	cp -r input/* output/ # so that there is plaintext on the site
+	cp htaccess output/.htaccess
+	cd output
+	git add .
+	git commit -m "update"
+	git push
