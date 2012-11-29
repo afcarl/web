@@ -32,8 +32,8 @@
                 style = p["title"] == page["title"] and "current" or ""
                 site_base = options.base_url
                 if 'index.html' in p["url"]:
-                    # clean_url = site_base + p["url"].split('index.html')[0]
-                    clean_url = p["url"].split('index.html')[0]
+                    clean_url = site_base + p["url"].split('index.html')[0]
+                    # clean_url = p["url"].split('index.html')[0]
                 else:
                     clean_url = p["url"].split('.html')[0]
                 
