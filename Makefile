@@ -20,7 +20,7 @@ deploy:
 redeploy: build deploy
 
 github:
-	poole --build --md-ext='codehilite(guess_lang=False)' --md-ext='footnotes' --base-url="aaren.github.com/"
+	poole --build --md-ext='codehilite(guess_lang=False)' --md-ext='footnotes' --base-url="http://aaren.github.com/"
 	cp -r input/* output/ # so that there is plaintext on the site
 	cp htaccess output/.htaccess
 	cd output
