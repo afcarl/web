@@ -38,7 +38,7 @@ Research
 
 I am investigating the impact that large storms have on their local
 environment. I am using laboratory experiments, numerical modelling and
-field data to investigate the role cold pools in the transmission of
+field data to investigate the role of cold pools in the transmission of
 energy away from the storm. Specifically, using a lock release tank and
 high resolution stereoscopic PIV to analyse gravity currents in
 homogeneous and two layer fluid and the UK Met Office Large Eddy Model to
