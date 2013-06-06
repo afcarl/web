@@ -23,6 +23,7 @@ _SITEMAP_URL = """
 </url>
 """
 
+
 def hook_preconvert_sitemap():
     """Generate Google sitemap.xml file."""
     date = datetime.strftime(datetime.now(), "%Y-%m-%d")
@@ -50,36 +51,42 @@ def hook_preconvert_sitemap():
 #
 # Aaron O'Leary Nov 2012
 #
-# To configure, play around in ref_style and bib_entry_style for
+# To configure, play around in make_ref_html and bib_entry_style for
 # the inline and per line bibliography appearance.
 #
-# ref_html and bib_entry_html define the html to be used for the
+# make_ref_html and bib_entry_html define the html to be used for the
 # citation and the bibliography, so look in those to change any
 # hyperlinking.
 
 # This is the bibtex file with all of your references in.
 BIBFILE = '/home/eeaol/papers/library.bib'
 
+
 def hook_preconvert_citations():
     """Replace [#citekey] with html"""
     for p in pages:
-        # if hasattr(p, 'bibliography'):
-        citekeys = list_citekeys(p.source)
+        citekeys = list_unique_citekeys(p.source)
         p.citekeys = citekeys
-        p.source = replace_all(p.citekeys, p.source)
+        matches = list_citematches(p.source)
+        p.source = replace_all(matches, p.source)
+
 
 def bibliography():
     """Create the bibliography"""
     # page.citekeys has been set in the hook_preconvert
     return bib_html(page.citekeys)
 
-def ref_style():
+
+def ref_style(style='citep'):
     """Define the in-text citation style"""
     # author, name
-    rs = "({author}, {year})"
-    # numbered citations
-    # rs = "[{cite_no}]"
-    return rs
+    if style is 'citep':
+        return "{author}, {year}"
+    elif style is 'citet':
+        return "{author} ({year})"
+    elif style is 'numbered':
+        return "[{cite_no}]"
+
 
 def bib_entry_style():
     """The text that goes in the references for a given citekey."""
@@ -87,6 +94,7 @@ def bib_entry_style():
         <strong>{title}</strong>, \
         <em>{journal}</em>, {year}"
     return bs
+
 
 #---------------CITATION methods ---------------------------------------------#
 def load_citekey(citekey, bibfile=BIBFILE):
@@ -97,6 +105,7 @@ def load_citekey(citekey, bibfile=BIBFILE):
     bib_data = parser.parse_file(bibfile)
     entry = bib_data.entries[citekey]
     return entry
+
 
 def gen_citefields(citekey):
     """Rearrange the bib entries into something more useful.
@@ -115,25 +124,51 @@ def gen_citefields(citekey):
         D['author'] = authors[0] + ' et al'
     return D
 
-def ref_html(citekey, cite_no=None):
-    """The html that goes in the text for a given citekey.
-    cite_no is used if we're having numbered citations"""
-    # dictionary of cite_fields, e.g. author, year, journal,
-    cite_fields = gen_citefields(citekey)
-    # need this for numbered citations
-    if cite_no:
-        cite_fields['cite_no'] = cite_no
-    ref_text = ref_style().format(**cite_fields)
-    link_title = '{author}, {year}'.format(**cite_fields)
-    rh = """<a class="citation"
-            href="#{citekey}"
-            title="{link_title}">{ref_text}
-            <span class="citekey"
-                    style="display:none">
-                    {citekey}
-                </span>
-            </a>"""
-    return rh.format(ref_text=ref_text, citekey=citekey, link_title=link_title)
+
+def make_ref_html(match):
+    """From a mmd citation element, create the appropriate html
+    replacement.
+
+    the text replacement should go as
+
+    key        --> (author, year)                   (citep)
+    key;       --> author (year)                    (citet)
+    key, key2  --> (author, year; author2, year2)   (citep)
+    key, key2; --> author (year); author2, (year2)  (citet)
+    """
+    def make_key_html(citekey, style):
+            """Make the html for a single citekey, with given cite
+            style (e.g. 'citet', 'citep').
+            """
+            cite_fields = gen_citefields(citekey)
+            link_title = '{journal}'.format(**cite_fields)
+            ref_html_skeleton = ('<a class="citation" '
+                                 'href="#{citekey}"'
+                                 'title="{link_title}">'
+                                 '{ref_text}'
+                                 '<span class="citekey" '
+                                 'style="display:none">'
+                                 '{citekey}'
+                                 '</span>'
+                                 '</a>')
+            ref_text = ref_style(style).format(**cite_fields)
+            return ref_html_skeleton.format(ref_text=ref_text,
+                                            citekey=citekey,
+                                            link_title=link_title)
+
+    if match[-1] != ';':
+        # citep
+        citekeys = match.split(', ')
+        ref_htmls = [make_key_html(key, style='citep') for key in citekeys]
+        ref_html = '(' + '; '.join(ref_htmls) + ')'
+        return ref_html
+    elif match[-1] == ';':
+        # citet
+        citekeys = match[:-1].split(', ')
+        ref_htmls = [make_key_html(key, style='citet') for key in citekeys]
+        ref_html = '; '.join(ref_htmls)
+        return ref_html
+
 
 def bib_entry_html(citekey):
     """The html that goes in the references for a given citekey."""
@@ -151,8 +186,9 @@ def bib_entry_html(citekey):
         """
     link = "http://homepages.see.leeds.ac.uk/~eeaol/p/{}.pdf".format(citekey)
     return beh.format(citekey=citekey,
-                        bib_entry_text=bib_entry_text,
-                        link_to_paper=link)
+                      bib_entry_text=bib_entry_text,
+                      link_to_paper=link)
+
 
 def bib_html(citekeys):
     """The entire html of the reference section"""
@@ -165,33 +201,50 @@ def bib_html(citekeys):
             """
     return bibh.format(bib_entries=bib_entries)
 
-def list_citekeys(text):
-    """Create a non duplicating, ordered list of the citekeys found
-    in a text.
 
-    TODO: work with citet.
-    TODO: work with multiple
+def list_citematches(text):
+    """List all mmd citation matches."""
+    # all mmd citations regardless of type (keeping ; that tells us
+    # citet / citep)
+    all_regex = "\[#(.*?)\]"
+    all_match_re = re.compile(all_regex)
+    all_matches = all_match_re.findall(text)
+    return all_matches
+
+
+def list_unique_citekeys(text):
+    """Creates a unique list of citation keys/
+
+    We could find specific keys with these:
+
+        # cite p end is not preceded by a ;
+        citep_regex = "\[#(.*?)(?<!;)\]"
+        # cite t end is preceded by a ;
+        citet_regex = "\[#(.*?);\]"
+        # all keys regardless of type
+        all_regex = "\[#(.*?);?\]"
     """
-    citekey_regex = "\[#(.*?)\]"
-    regex = re.compile(citekey_regex)
-    citekeys = regex.findall(text)
+    # find all mmd citations regardless of type
+    all_regex = "\[#(.*?);?\]"
+    all_ = re.compile(all_regex)
+    all_keys_with_multiple = all_.findall(text)
+    # split multiples
+    all_keys = [s.split(', ') for s in all_keys_with_multiple]
+    # flatten lists
+    flat_all_keys = [i for sub in all_keys for i in sub]
     # remove duplicates and preserve order
-    citekeys = [v for i, v in enumerate(citekeys) if citekeys.index(v) == i]
+    citekeys = [v for i, v in enumerate(flat_all_keys)
+                if flat_all_keys.index(v) == i]
     return citekeys
 
-def replace(citekey, cite_html, text):
-    """Replace citekey with cite_html in text.
 
-    TODO: replace citet as well.
-    """
-    citekey_regex = "\[#{citekey}\]".format(citekey=citekey)
-    regex = re.compile(citekey_regex)
-    subbed_text = regex.sub(cite_html, text)
-    return subbed_text
-
-def replace_all(citekeys, text):
-    for cite_no, citekey in enumerate(citekeys):
-        cite_html = ref_html(citekey, cite_no + 1)
-        text = replace(citekey, cite_html, text)
+def replace_all(matches, text):
+    for match in matches:
+        cite_html = make_ref_html(match)
+        # something to allow verbatim here?
+        mmd_cite_element = '\[#{key}\]'.format(key=match)
+        regex = re.compile(mmd_cite_element)
+        # replace the match with appropriate html
+        text = regex.sub(cite_html, text)
     return text
 #-----------------------------------------------------------------------------#
