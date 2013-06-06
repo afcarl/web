@@ -45,6 +45,8 @@ def hook_preconvert_sitemap():
 #       - missing pybtex
 #       - missing bibfile
 #       - missing citation fields
+# TODO: find and render citet ([#key;]
+# TODO: find multiple citations ([#key1, key2])
 #
 # Aaron O'Leary Nov 2012
 #
@@ -164,7 +166,12 @@ def bib_html(citekeys):
     return bibh.format(bib_entries=bib_entries)
 
 def list_citekeys(text):
-    """Create a list of the citekeys found in a text."""
+    """Create a non duplicating, ordered list of the citekeys found
+    in a text.
+
+    TODO: work with citet.
+    TODO: work with multiple
+    """
     citekey_regex = "\[#(.*?)\]"
     regex = re.compile(citekey_regex)
     citekeys = regex.findall(text)
@@ -173,7 +180,10 @@ def list_citekeys(text):
     return citekeys
 
 def replace(citekey, cite_html, text):
-    """Replace citekey with cite_html in text"""
+    """Replace citekey with cite_html in text.
+
+    TODO: replace citet as well.
+    """
     citekey_regex = "\[#{citekey}\]".format(citekey=citekey)
     regex = re.compile(citekey_regex)
     subbed_text = regex.sub(cite_html, text)
