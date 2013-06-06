@@ -119,7 +119,8 @@ def ref_html(citekey, cite_no=None):
     # dictionary of cite_fields, e.g. author, year, journal,
     cite_fields = gen_citefields(citekey)
     # need this for numbered citations
-    cite_fields['cite_no'] = cite_no + 1
+    if cite_no:
+        cite_fields['cite_no'] = cite_no
     ref_text = ref_style().format(**cite_fields)
     link_title = '{author}, {year}'.format(**cite_fields)
     rh = """<a class="citation"
@@ -180,7 +181,7 @@ def replace(citekey, cite_html, text):
 
 def replace_all(citekeys, text):
     for cite_no, citekey in enumerate(citekeys):
-        cite_html = ref_html(citekey, cite_no)
+        cite_html = ref_html(citekey, cite_no + 1)
         text = replace(citekey, cite_html, text)
     return text
 #-----------------------------------------------------------------------------#
