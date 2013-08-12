@@ -55,22 +55,22 @@ to [this site][jontourage].
 
 Install Enthought, which is free using the [free][free-epd] version of 
 Enthought, or [with an academic license][academic-epd]. I did this with
-EPD-7.2-2-rh5-x86.
+EPD-7.3-2-rh5-x86.
 
 [free-epd]: http://www.enthought.com/products/epd_free.php
 [academic-epd]: http://www.enthought.com/products/edudownload.php
 
 Now we can follow the method [here][decomposition] to have Enthought working
-with virtual env.
+with virtualenv.
 
 [decomposition]: http://seanjtaylor.com/2011/03/03/getting-epd-to-play-nicely-with-virtual-environments/
 
-    export EPD="$HOME/make/epd-7.2-2-rh5-x86"
+    export EPD="$HOME/src/epd"
     cd $EPD
     bin/easy_install virtualenv
     bin/virtualenv $WORKON_HOME/epd
 
-Then change a section of $WORKON_HOME/epd/bin/activate from
+Then change a section of `$WORKON_HOME/epd/bin/activate` from
 
     VIRTUAL_ENV="$HOME/.virtualenvs/epd"
     export VIRTUAL_ENV
@@ -81,13 +81,24 @@ Then change a section of $WORKON_HOME/epd/bin/activate from
 
 to
 
-    EPD="$HOME/src/apps/epd-7.0-1-rh5-x86_64"
+    EPD="$HOME/src/epd"
     VIRTUAL_ENV="$HOME/.virtualenvs/epd"
     export VIRTUAL_ENV
 
     _OLD_VIRTUAL_PATH="$PATH"
-    PATH="$VIRTUAL_ENV/bin:$EPD/bin:$PATH"
+    PATH="$EPD/bin:$VIRTUAL_ENV/bin:$PATH"
     export PATH 
+
+Then we create the virtualenv for epd:
+
+    mkvirtualenv --distribute epd
+
+You'll want to get pip installing and upgrading packages in
+Enthought as well, which means we can't use the pip that comes in
+the virtualenv.
+
+    cd $EPD
+    easy_install pip
 
 And we can now get enthought as a working environment by
 
@@ -95,5 +106,3 @@ And we can now get enthought as a working environment by
     ...do some work...
     ...finished...
     deactivate
-
-

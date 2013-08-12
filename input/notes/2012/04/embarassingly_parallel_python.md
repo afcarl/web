@@ -23,9 +23,9 @@ is called `process(run)` and I can get a list of all the runs by
 create a pool of workers, with each worker working on a separate run (total
 number is around 60).
 
-    #!python
+    :::python
     from multiprocessing import Pool
-    
+
     def pool(proc, runs):
         p = Pool(processes=len(runs))
         p.map(proc, runs)
