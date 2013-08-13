@@ -1,5 +1,5 @@
 menu-position: 99
-date: 14/03/2012
+date: 13/08/2013
 ---
 
 Aaron O'Leary
@@ -7,7 +7,9 @@ Aaron O'Leary
 
 * <eeaol@leeds.ac.uk>
 
-* <http://homepages.see.leeds.ac.uk/~eeaol>
+* [aaren.me](http://aaren.me)
+
+* [github.com/aaren](http://www.github.com/aaren)
 
 * School of Earth and Environment, University of Leeds, LS2 9JT
 
