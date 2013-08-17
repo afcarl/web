@@ -1,5 +1,4 @@
-
-title: aaren.me
+title: home
 menu-position: 0
 ---
 
