@@ -1,10 +1,7 @@
 
-title: home
+title: aaren.me
 menu-position: 0
 ---
-
-Aaron O'Leary
--------------
 
 I am a postgraduate research student at the University of Leeds,
 based in the [Institute for Climate and Atmospheric Science][icas]

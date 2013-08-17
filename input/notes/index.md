@@ -14,6 +14,6 @@ for p in posts:
     if not re.search(r'\/\d{4}\/\d{2}\/\d{2}\/', p.fname):
         date = datetime.strptime(p.date, "%Y-%m-%d").strftime("%B %d, %Y")
         clean_url = p.url.split('.html')[0]
-        print "  * **[%s](%s)** - %s" % (p.post, clean_url, date) # markdown list item
+        print "  * **[%s](%s)** - %s" % (p.title, clean_url, date) # markdown list item
 %-->
 

@@ -1,9 +1,7 @@
+title: Aaron O'Leary
 menu-position: 99
 date: 13/08/2013
 ---
-
-Aaron O'Leary
-=============
 
 * <eeaol@leeds.ac.uk>
 
