@@ -1,6 +1,10 @@
 title: notes
 menu-position: 10
 ---
+
+Notes
+-----
+
 Sometimes I write words about things.
 
 <!--%
