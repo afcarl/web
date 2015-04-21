@@ -17,10 +17,19 @@
     <script type="text/javascript"
       src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML">
     </script>
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script type="text/javascript">
+jQuery(function($){
+  $('#content img').each(function(index) {
+    $this = $(this).wrap('<div class="img-caption" />');
+    $('<p class="caption">' + $this.attr("alt") + '</p>').insertAfter($this);
+  });
+});
+</script>
 </head>
 <body>
     <div id="box">
-        <div id="menu">
+        <div id="menu" class="noPrint">
         <!--%
             mpages = [p for p in pages if "menu-position" in p]
             mpages.sort(key=lambda p: int(p["menu-position"]))

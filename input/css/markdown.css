@@ -74,6 +74,15 @@ dd { margin: 0 0 0 2em; }
 
 img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
 
+div.img-caption {
+margin: 0 1em 1em 0em; /* 3/7/12 zero margin left and right sides */
+border: #b5c19f 1px solid;
+padding: 7px 7px 0px 7px;
+font-size: 10pt;
+font-weight: bold;
+text-align: center;
+}
+
 table { border-collapse: collapse; border-spacing: 0; }
 td { vertical-align: top; }
 
@@ -87,7 +96,8 @@ body{font-size:16px;}
 
 @media print {
   * { background: transparent !important; color: black !important; filter:none !important; -ms-filter: none !important; }
-  body{font-size:12pt; max-width:100%;}
+  body{font-size:18pt; max-width:100%;}
+  .noPrint { display: none !important; }
   a, a:visited { text-decoration: underline; }
   hr { height: 1px; border:0; border-bottom:1px solid black; }
   a[href]:after { content: " (" attr(href) ")"; }
