@@ -24,4 +24,4 @@ github:
 	cp -r input/* output/ # so that there is plaintext on the site
 	cp htaccess output/.htaccess
 	cp CNAME output/CNAME
-	cd output; git add .; git commit -m "update"; git push
+	cd output; git add .; git commit -m "update"; git push --force
